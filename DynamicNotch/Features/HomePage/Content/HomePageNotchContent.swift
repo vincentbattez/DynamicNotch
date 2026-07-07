@@ -14,6 +14,7 @@ struct HomePageNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
     let settings: HomePageSettingsStore
     let homePages: HomePages
     let localTimerViewModel: LocalTimerViewModel
+    let notificationCenterViewModel: NotificationCenterViewModel
     
     var priority: Int { NotchContentRegistry.HomePage.active.priority }
     var isExpandable: Bool { true }
@@ -30,8 +31,8 @@ struct HomePageNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
         case .camera:
             let isStarted = UserDefaults.standard.bool(forKey: "isCameraStarted")
             return (top: isStarted ? 34 : 24, bottom: isStarted ? 48 : 38)
-            
-        case .localTimer, .vpn, .systemStats:
+
+        case .localTimer, .vpn, .systemStats, .notifications:
             return (top: 24, bottom: 38)
         }
     }
@@ -63,8 +64,8 @@ struct HomePageNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
             } else {
                 return baseHeight * 0.2
             }
-            
-        case .localTimer, .vpn, .systemStats:
+
+        case .localTimer, .vpn, .systemStats, .notifications:
             return baseHeight * 0.2
         }
     }
@@ -90,12 +91,15 @@ struct HomePageNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
             
         case .vpn:
             return .init(width: baseWidth + 140, height: baseHeight + 110)
-            
+
         case .systemStats:
             return .init(width: baseWidth + 140, height: baseHeight + 110)
+
+        case .notifications:
+            return .init(width: baseWidth + 170, height: baseHeight + 130)
         }
     }
-    
+
     func expandedDynamicIslandSize(baseWidth: CGFloat, baseHeight: CGFloat) -> CGSize {
         switch homePages {
         case .camera:
@@ -117,12 +121,15 @@ struct HomePageNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
             
         case .vpn:
             return .init(width: baseWidth + 180, height: baseHeight + 125)
-            
+
         case .systemStats:
             return .init(width: baseWidth + 180, height: baseHeight + 125)
+
+        case .notifications:
+            return .init(width: baseWidth + 200, height: baseHeight + 130)
         }
     }
-    
+
     @MainActor
     func makeExpandedView() -> AnyView {
         AnyView(
@@ -130,6 +137,7 @@ struct HomePageNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
                 notchViewModel: notchViewModel,
                 settings: settings,
                 localTimerViewModel: localTimerViewModel,
+                notificationCenterViewModel: notificationCenterViewModel,
                 initialPage: homePages
             )
         )

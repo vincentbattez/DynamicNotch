@@ -12,7 +12,8 @@ struct CameraNotchView: View {
     let notchViewModel: NotchViewModel
     let settings: HomePageSettingsStore
     let localTimerViewModel: LocalTimerViewModel
-    
+    let notificationCenterViewModel: NotificationCenterViewModel
+
     @StateObject private var cameraViewModel = CameraViewModel()
     @State private var isHovering: Bool = false
     @State private var previewID = UUID()
@@ -107,7 +108,8 @@ struct CameraNotchView: View {
                     notchViewModel: notchViewModel,
                     settings: settings,
                     homePages: .camera,
-                    localTimerViewModel: localTimerViewModel
+                    localTimerViewModel: localTimerViewModel,
+                    notificationCenterViewModel: notificationCenterViewModel
                 )
             ))
         }) {
@@ -152,7 +154,8 @@ struct CameraNotchView: View {
                         notchViewModel: notchViewModel,
                         settings: settings,
                         homePages: .camera,
-                        localTimerViewModel: localTimerViewModel
+                        localTimerViewModel: localTimerViewModel,
+                        notificationCenterViewModel: notificationCenterViewModel
                     )
                 ))
             }) {

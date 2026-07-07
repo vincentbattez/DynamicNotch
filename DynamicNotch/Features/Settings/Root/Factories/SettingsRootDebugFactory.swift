@@ -108,6 +108,9 @@ extension SettingsRootViewModel {
         )
         let resolvedHomePageViewModel = homePageViewModel ?? HomePageViewModel()
         let resolvedLocalTimerViewModel = localTimerViewModel ?? LocalTimerViewModel()
+        let resolvedNotificationCenterViewModel = NotificationCenterViewModel(
+            monitor: NotificationInboxMonitor(inboxDirectory: AppContainer.notificationsInboxDirectory)
+        )
         let resolvedCalendarViewModel = calendarViewModel ?? CalendarViewModel()
         let resolvedCoordinator = notchEventCoordinator ?? NotchEventCoordinator(
             notchViewModel: resolvedNotchViewModel,
@@ -125,6 +128,7 @@ extension SettingsRootViewModel {
             lockScreenManager: resolvedLockScreenManager,
             homePageViewModel: resolvedHomePageViewModel,
             localTimerViewModel: resolvedLocalTimerViewModel,
+            notificationCenterViewModel: resolvedNotificationCenterViewModel,
             calendarViewModel: resolvedCalendarViewModel
         )
 

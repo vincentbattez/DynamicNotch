@@ -12,42 +12,47 @@ enum HomePages: String, CaseIterable, Hashable, Codable, Identifiable {
     case localTimer
     case vpn
     case systemStats
-    
+    case notifications
+
     var id: String { rawValue }
-    
+
     var title: LocalizedStringKey {
         switch self {
         case .camera: return "Camera"
         case .localTimer: return "Timer"
         case .vpn: return "VPN"
         case .systemStats: return "Stats"
+        case .notifications: return "Notifications"
         }
     }
-    
+
     var subtitle: LocalizedStringKey {
         switch self {
         case .camera: return "Quickly access the camera."
         case .localTimer: return "Set a quick timer."
         case .vpn: return "Manage VPN connections."
         case .systemStats: return "Monitor system resources."
+        case .notifications: return "Summaries pushed by your scripts."
         }
     }
-    
+
     var icon: String {
         switch self {
         case .camera: return "camera.fill"
         case .localTimer: return "timer"
         case .vpn: return "network.badge.shield.half.filled"
         case .systemStats: return "cpu"
+        case .notifications: return "bell.fill"
         }
     }
-    
+
     var tint: Color {
         switch self {
         case .camera: return .black
         case .localTimer: return .orange
         case .vpn: return .blue
         case .systemStats: return .green
+        case .notifications: return .red
         }
     }
 }
@@ -58,16 +63,18 @@ struct HomePageNotchView: View {
     let notchViewModel: NotchViewModel
     let settings: HomePageSettingsStore
     let localTimerViewModel: LocalTimerViewModel
+    let notificationCenterViewModel: NotificationCenterViewModel
     let initialPage: HomePages
-    
+
     @State private var currentPage: HomePages?
     @State private var updateTask: Task<Void, Never>? = nil
     @State private var isWaitingForSizeUpdate = false
-    
-    init(notchViewModel: NotchViewModel, settings: HomePageSettingsStore, localTimerViewModel: LocalTimerViewModel, initialPage: HomePages) {
+
+    init(notchViewModel: NotchViewModel, settings: HomePageSettingsStore, localTimerViewModel: LocalTimerViewModel, notificationCenterViewModel: NotificationCenterViewModel, initialPage: HomePages) {
         self.notchViewModel = notchViewModel
         self.settings = settings
         self.localTimerViewModel = localTimerViewModel
+        self.notificationCenterViewModel = notificationCenterViewModel
         self.initialPage = initialPage
         
         let activePages = settings.homePageOrder.filter { !settings.homePageDisabled.contains($0) }
@@ -134,7 +141,8 @@ struct HomePageNotchView: View {
                             notchViewModel: notchViewModel,
                             settings: settings,
                             homePages: newPage,
-                            localTimerViewModel: localTimerViewModel
+                            localTimerViewModel: localTimerViewModel,
+                            notificationCenterViewModel: notificationCenterViewModel
                         )
                     )
                 )
@@ -152,24 +160,27 @@ struct HomePageNotchView: View {
                         notchViewModel: notchViewModel,
                         settings: settings,
                         homePages: activePages.first ?? .camera,
-                        localTimerViewModel: localTimerViewModel
+                        localTimerViewModel: localTimerViewModel,
+                        notificationCenterViewModel: notificationCenterViewModel
                     )
                 )
             )
         }
     }
-    
+
     @ViewBuilder
     private func pageView(for page: HomePages) -> some View {
         switch page {
         case .camera:
-            CameraNotchView(notchViewModel: notchViewModel, settings: settings, localTimerViewModel: localTimerViewModel)
+            CameraNotchView(notchViewModel: notchViewModel, settings: settings, localTimerViewModel: localTimerViewModel, notificationCenterViewModel: notificationCenterViewModel)
         case .localTimer:
             LocalTimerSetupNotchView(localTimerViewModel: localTimerViewModel)
         case .vpn:
             VpnPageNotchView(notchViewModel: notchViewModel)
         case .systemStats:
             SystemStatsPageNotchView(notchViewModel: notchViewModel)
+        case .notifications:
+            NotificationsPageNotchView(notificationCenterViewModel: notificationCenterViewModel)
         }
     }
 }

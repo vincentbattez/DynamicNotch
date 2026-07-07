@@ -20,6 +20,7 @@ final class NotchEventCoordinator: ObservableObject {
     private let fileConverterViewModel: FileConverterViewModel
     private let timerViewModel: TimerViewModel
     private let localTimerViewModel: LocalTimerViewModel
+    private let notificationCenterViewModel: NotificationCenterViewModel
     private let homePageViewModel: HomePageViewModel
     private let calendarViewModel: CalendarViewModel
     private let lockScreenManager: LockScreenManager
@@ -72,6 +73,7 @@ final class NotchEventCoordinator: ObservableObject {
         lockScreenManager: LockScreenManager,
         homePageViewModel: HomePageViewModel,
         localTimerViewModel: LocalTimerViewModel,
+        notificationCenterViewModel: NotificationCenterViewModel,
         calendarViewModel: CalendarViewModel
     ) {
         self.notchViewModel = notchViewModel
@@ -84,6 +86,7 @@ final class NotchEventCoordinator: ObservableObject {
         self.fileConverterViewModel = fileConverterViewModel
         self.timerViewModel = timerViewModel
         self.localTimerViewModel = localTimerViewModel
+        self.notificationCenterViewModel = notificationCenterViewModel
         self.homePageViewModel = homePageViewModel
         self.calendarViewModel = calendarViewModel
         self.lockScreenManager = lockScreenManager
@@ -135,7 +138,8 @@ final class NotchEventCoordinator: ObservableObject {
         self.homePageHandler = NotchHomePageEventsHandler(
             notchViewModel: notchViewModel,
             settingsViewModel: settingsViewModel,
-            localTimerViewModel: localTimerViewModel
+            localTimerViewModel: localTimerViewModel,
+            notificationCenterViewModel: notificationCenterViewModel
         )
         self.calendarHandler = NotchCalendarEventsHandler(
             notchViewModel: notchViewModel,
@@ -193,8 +197,12 @@ final class NotchEventCoordinator: ObservableObject {
     }
     
     func checkFirstLaunch() {
+        // Notifications feature is wired always-on for this slice: start the inbox watcher
+        // and drain any files dropped while the app was closed, regardless of onboarding state.
+        notificationCenterViewModel.startMonitoring()
+
         let hasSeenOnboarding = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
-        
+
         if !hasSeenOnboarding {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 self.handleOnboardingEvent(.onboarding)
