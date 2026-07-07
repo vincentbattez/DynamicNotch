@@ -5,20 +5,44 @@
 
 import SwiftUI
 
-/// Read-only Notifications page for the Home carousel. Renders the shared
-/// `NotificationCenterViewModel` list: a header (title + "Clear") and a scrollable
-/// list of rows. Script-authored fields (`title`, `source`) are rendered with
-/// `Text(verbatim:)` so a title like "50% done" is never treated as a localization key.
+/// Notifications page shared by the Home carousel and the ambient badge expanded view.
+/// Renders the shared `NotificationCenterViewModel` as a two-level UX:
+/// - Level 1 (list): header with "Clear" + scrollable rows.
+/// - Level 2 (detail): full payload + Read / Done / Close buttons.
 ///
-/// Slice 1 is read-only: tapping a row does nothing and there is no detail level yet
-/// (Read/Done/Close arrive in a later slice). The row is factored into
-/// `NotificationRowView` so the ambient badge can reuse it without a rewrite.
+/// Tapping a row opens the detail without changing any state. Read/Done change state
+/// and return to the list; Close returns without any change.
 struct NotificationsPageNotchView: View {
     @Environment(\.isDynamicIsland) private var isDynamicIsland
 
     @ObservedObject var notificationCenterViewModel: NotificationCenterViewModel
 
+    @State private var selectedItem: NotificationItem?
+
     var body: some View {
+        ZStack {
+            if let item = selectedItem {
+                NotificationDetailNotchView(
+                    item: item,
+                    viewModel: notificationCenterViewModel,
+                    onDismiss: { selectedItem = nil }
+                )
+                .transition(.asymmetric(
+                    insertion: .move(edge: .trailing).combined(with: .opacity),
+                    removal: .move(edge: .trailing).combined(with: .opacity)
+                ))
+            } else {
+                listLevel
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .leading).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
+            }
+        }
+        .animation(.spring(response: 0.3, dampingFraction: 0.85), value: selectedItem?.id)
+    }
+
+    private var listLevel: some View {
         ZStack {
             VStack(alignment: .leading, spacing: 0) {
                 header
@@ -72,7 +96,12 @@ struct NotificationsPageNotchView: View {
         ScrollView(.vertical, showsIndicators: false) {
             LazyVStack(spacing: 6) {
                 ForEach(notificationCenterViewModel.items) { item in
-                    NotificationRowView(item: item)
+                    Button {
+                        selectedItem = item
+                    } label: {
+                        NotificationRowView(item: item)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
             .padding(.horizontal, 2)
