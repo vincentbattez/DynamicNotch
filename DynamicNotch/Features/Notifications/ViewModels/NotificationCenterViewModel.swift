@@ -78,18 +78,37 @@ final class NotificationCenterViewModel: ObservableObject {
     }
 
     func add(payload: NotificationPayload) {
-        let item = NotificationItem(
-            id: UUID(),
-            title: payload.title,
-            summary: payload.summary,
-            level: payload.level,
-            source: payload.source,
-            icon: payload.icon,
-            receivedAt: now(),
-            read: false
-        )
+        // Normalize blank source to nil so empty-string sources behave like absent.
+        let source = payload.source.flatMap {
+            $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : $0
+        }
 
-        items.append(item)
+        var newItems = items
+
+        if let source, let index = newItems.firstIndex(where: { $0.source == source }) {
+            // Coalesce: update content in place, re-mark unread, refresh timestamp, promote to head.
+            newItems[index].title = payload.title
+            newItems[index].summary = payload.summary
+            newItems[index].level = payload.level
+            newItems[index].icon = payload.icon
+            newItems[index].receivedAt = now()
+            newItems[index].read = false
+            let coalesced = newItems.remove(at: index)
+            newItems.insert(coalesced, at: 0)
+        } else {
+            newItems.append(NotificationItem(
+                id: UUID(),
+                title: payload.title,
+                summary: payload.summary,
+                level: payload.level,
+                source: source,
+                icon: payload.icon,
+                receivedAt: now(),
+                read: false
+            ))
+        }
+
+        items = newItems
         persistItems()
     }
 
