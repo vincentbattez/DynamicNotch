@@ -14,7 +14,18 @@ struct NotificationDetailNotchView: View {
 
     let item: NotificationItem
     let viewModel: NotificationCenterViewModel
+    var isInCarousel: Bool = false
     let onDismiss: () -> Void
+
+    private var topPadding: CGFloat {
+        if isDynamicIsland { return 8 }
+        return isInCarousel ? 20 : 40
+    }
+
+    private var horizontalPadding: CGFloat {
+        if isDynamicIsland { return isInCarousel ? 6 : 14 }
+        return isInCarousel ? 6 : 28
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -26,9 +37,9 @@ struct NotificationDetailNotchView: View {
             Spacer(minLength: 4)
             actionButtons
         }
-        .padding(.top, isDynamicIsland ? 8 : 20)
+        .padding(.top, topPadding)
         .padding(.bottom, isDynamicIsland ? 8 : 10)
-        .padding(.horizontal, isDynamicIsland ? 16 : 24)
+        .padding(.horizontal, horizontalPadding)
     }
 
     private var header: some View {

@@ -180,7 +180,7 @@ struct HomePageNotchView: View {
         case .systemStats:
             SystemStatsPageNotchView(notchViewModel: notchViewModel)
         case .notifications:
-            NotificationsPageNotchView(notificationCenterViewModel: notificationCenterViewModel)
+            NotificationsPageNotchView(notificationCenterViewModel: notificationCenterViewModel, isInCarousel: true)
         }
     }
 }

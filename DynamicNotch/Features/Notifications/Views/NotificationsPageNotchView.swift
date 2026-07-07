@@ -12,12 +12,32 @@ import SwiftUI
 ///
 /// Tapping a row opens the detail without changing any state. Read/Done change state
 /// and return to the list; Close returns without any change.
+///
+/// `isInCarousel`: when true (carousel via HomePageNotchView), a Spacer() in the outer
+/// container already pushes content below the physical notch, so minimal top padding
+/// suffices. When false (ambient badge expanded), the view fills the frame from y=0 and
+/// must clear the physical notch (~37pt) with its own top padding.
 struct NotificationsPageNotchView: View {
     @Environment(\.isDynamicIsland) private var isDynamicIsland
 
     @ObservedObject var notificationCenterViewModel: NotificationCenterViewModel
+    var isInCarousel: Bool = false
 
     @State private var selectedItem: NotificationItem?
+
+    // Top padding: badge starts at the notch ceiling and must clear the physical notch
+    // hardware (~37pt); carousel's outer Spacer() already positions content lower.
+    private var topPadding: CGFloat {
+        if isDynamicIsland { return 8 }
+        return isInCarousel ? 20 : 40
+    }
+
+    // Horizontal padding: carousel wrapper adds 30pt, so pages only need a few points.
+    // Badge has no wrapper and needs clearance from the 24pt corner radius.
+    private var horizontalPadding: CGFloat {
+        if isDynamicIsland { return isInCarousel ? 6 : 14 }
+        return isInCarousel ? 6 : 28
+    }
 
     var body: some View {
         ZStack {
@@ -25,6 +45,7 @@ struct NotificationsPageNotchView: View {
                 NotificationDetailNotchView(
                     item: item,
                     viewModel: notificationCenterViewModel,
+                    isInCarousel: isInCarousel,
                     onDismiss: { selectedItem = nil }
                 )
                 .transition(.asymmetric(
@@ -48,8 +69,8 @@ struct NotificationsPageNotchView: View {
                 header
                 Spacer()
             }
-            .padding(.top, isDynamicIsland ? 8 : 20)
-            .padding(.horizontal, isDynamicIsland ? 20 : 34)
+            .padding(.top, topPadding)
+            .padding(.horizontal, horizontalPadding)
 
             VStack(spacing: 0) {
                 Spacer()
@@ -60,7 +81,7 @@ struct NotificationsPageNotchView: View {
                     list
                 }
             }
-            .padding(.horizontal, isDynamicIsland ? 16 : 30)
+            .padding(.horizontal, horizontalPadding)
             .padding(.bottom, isDynamicIsland ? 7 : 12)
         }
     }
