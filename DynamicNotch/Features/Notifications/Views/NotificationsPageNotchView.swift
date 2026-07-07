@@ -64,26 +64,20 @@ struct NotificationsPageNotchView: View {
     }
 
     private var listLevel: some View {
-        ZStack {
-            VStack(alignment: .leading, spacing: 0) {
-                header
-                Spacer()
-            }
-            .padding(.top, topPadding)
-            .padding(.horizontal, horizontalPadding)
+        VStack(alignment: .leading, spacing: 0) {
+            header
 
-            VStack(spacing: 0) {
-                Spacer()
+            Spacer(minLength: 8)
 
-                if notificationCenterViewModel.items.isEmpty {
-                    emptyState
-                } else {
-                    list
-                }
+            if notificationCenterViewModel.items.isEmpty {
+                emptyState
+            } else {
+                list
             }
-            .padding(.horizontal, horizontalPadding)
-            .padding(.bottom, isDynamicIsland ? 7 : 12)
         }
+        .padding(.top, topPadding)
+        .padding(.horizontal, horizontalPadding)
+        .padding(.bottom, isDynamicIsland ? 7 : 12)
     }
 
     private var header: some View {
