@@ -48,7 +48,7 @@ struct NotificationsPageNotchView: View {
                 header
                 Spacer()
             }
-            .padding(.top, isDynamicIsland ? 8 : 4)
+            .padding(.top, isDynamicIsland ? 8 : 20)
             .padding(.horizontal, isDynamicIsland ? 20 : 34)
 
             VStack(spacing: 0) {

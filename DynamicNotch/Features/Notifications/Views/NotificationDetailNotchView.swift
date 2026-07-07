@@ -21,13 +21,12 @@ struct NotificationDetailNotchView: View {
             header
             Divider()
                 .background(.white.opacity(0.12))
-                .padding(.horizontal, isDynamicIsland ? 16 : 24)
                 .padding(.vertical, 8)
             summaryArea
             Spacer(minLength: 4)
             actionButtons
         }
-        .padding(.top, isDynamicIsland ? 8 : 6)
+        .padding(.top, isDynamicIsland ? 8 : 20)
         .padding(.bottom, isDynamicIsland ? 8 : 10)
         .padding(.horizontal, isDynamicIsland ? 16 : 24)
     }
@@ -57,7 +56,6 @@ struct NotificationDetailNotchView: View {
                 .foregroundStyle(.white.opacity(0.5))
             }
         }
-        .padding(.horizontal, isDynamicIsland ? 16 : 24)
     }
 
     private var summaryArea: some View {
@@ -69,7 +67,6 @@ struct NotificationDetailNotchView: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxHeight: 52)
-        .padding(.horizontal, isDynamicIsland ? 16 : 24)
     }
 
     private var actionButtons: some View {
@@ -103,6 +100,5 @@ struct NotificationDetailNotchView: View {
             }
             .buttonStyle(PrimaryButtonStyle(height: 30, backgroundColor: .white.opacity(0.06)))
         }
-        .padding(.horizontal, isDynamicIsland ? 16 : 24)
     }
 }
