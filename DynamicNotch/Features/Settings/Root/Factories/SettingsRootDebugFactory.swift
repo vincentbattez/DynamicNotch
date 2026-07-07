@@ -109,7 +109,7 @@ extension SettingsRootViewModel {
         let resolvedHomePageViewModel = homePageViewModel ?? HomePageViewModel()
         let resolvedLocalTimerViewModel = localTimerViewModel ?? LocalTimerViewModel()
         let resolvedNotificationCenterViewModel = NotificationCenterViewModel(
-            monitor: NotificationInboxMonitor(inboxDirectory: AppContainer.notificationsInboxDirectory)
+            monitor: InactiveNotificationInboxMonitor()
         )
         let resolvedCalendarViewModel = calendarViewModel ?? CalendarViewModel()
         let resolvedCoordinator = notchEventCoordinator ?? NotchEventCoordinator(
