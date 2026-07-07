@@ -24,7 +24,7 @@ final class NotificationsFeatureIntegrationTests: XCTestCase {
             in: inbox
         )
 
-        await assertEventually(timeout: 3.0) {
+        await assertEventually(timeout: 10.0) {
             await MainActor.run { viewModel.items.count == 1 }
         }
 

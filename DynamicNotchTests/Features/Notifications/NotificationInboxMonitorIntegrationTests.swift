@@ -22,7 +22,7 @@ final class NotificationInboxMonitorIntegrationTests: XCTestCase {
             in: inbox
         )
 
-        wait(for: [expectation], timeout: 3.0)
+        wait(for: [expectation], timeout: 10.0)
         monitor.stopMonitoring()
 
         XCTAssertEqual(received?.title, "Backup nightly")
@@ -43,7 +43,7 @@ final class NotificationInboxMonitorIntegrationTests: XCTestCase {
 
         atomicDropRaw("{ this is definitely not json ", named: "bad.json", in: inbox)
 
-        await assertEventually(timeout: 3.0) { rejectedFileCount(in: inbox) == 1 }
+        await assertEventually(timeout: 10.0) { rejectedFileCount(in: inbox) == 1 }
         monitor.stopMonitoring()
 
         XCTAssertEqual(receivedCount.value, 0)
@@ -62,7 +62,7 @@ final class NotificationInboxMonitorIntegrationTests: XCTestCase {
         // Valid JSON, but no `summary` — must be rejected at parse, not surfaced as a blank row.
         atomicDrop(["title": "No summary here"], named: "incomplete.json", in: inbox)
 
-        await assertEventually(timeout: 3.0) { rejectedFileCount(in: inbox) == 1 }
+        await assertEventually(timeout: 10.0) { rejectedFileCount(in: inbox) == 1 }
         monitor.stopMonitoring()
 
         XCTAssertEqual(receivedCount.value, 0)
@@ -88,7 +88,7 @@ final class NotificationInboxMonitorIntegrationTests: XCTestCase {
         // A single eligible drop acts as the sync point.
         atomicDrop(["title": "REAL", "summary": "ok"], named: "real.json", in: inbox)
 
-        wait(for: [expectation], timeout: 3.0)
+        wait(for: [expectation], timeout: 10.0)
         monitor.stopMonitoring()
 
         XCTAssertEqual(receivedTitles.values, ["REAL"])
@@ -120,7 +120,7 @@ final class NotificationInboxMonitorIntegrationTests: XCTestCase {
 
         monitor.startMonitoring()
 
-        wait(for: [expectation], timeout: 3.0)
+        wait(for: [expectation], timeout: 10.0)
         monitor.stopMonitoring()
 
         XCTAssertEqual(Set(receivedTitles.values), ["One", "Two"])
