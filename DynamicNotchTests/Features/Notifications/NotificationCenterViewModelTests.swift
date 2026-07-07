@@ -321,12 +321,7 @@ final class NotificationCenterViewModelTests: XCTestCase {
         let first = Date(timeIntervalSince1970: 1_000_000)
         let second = Date(timeIntervalSince1970: 2_000_000)
         var dates = [first, second]
-        let viewModel = NotificationCenterViewModel(
-            monitor: monitor,
-            defaults: UserDefaults(suiteName: UUID().uuidString)!,
-            now: { dates.removeFirst() }
-        )
-        TestLifetime.retain(viewModel)
+        let viewModel = makeViewModel(monitor: monitor, now: { dates.removeFirst() })
 
         monitor.publish(makePayload(source: "backup.sh"))
         monitor.publish(makePayload(source: "backup.sh"))
@@ -444,10 +439,11 @@ final class NotificationCenterViewModelTests: XCTestCase {
 private extension NotificationCenterViewModelTests {
     func makeViewModel(
         monitor: FakeNotificationInboxMonitor,
-        defaults: UserDefaults? = nil
+        defaults: UserDefaults? = nil,
+        now: @escaping () -> Date = { Date() }
     ) -> NotificationCenterViewModel {
         let store = defaults ?? UserDefaults(suiteName: UUID().uuidString)!
-        let viewModel = NotificationCenterViewModel(monitor: monitor, defaults: store)
+        let viewModel = NotificationCenterViewModel(monitor: monitor, defaults: store, now: now)
         TestLifetime.retain(viewModel)
         return viewModel
     }

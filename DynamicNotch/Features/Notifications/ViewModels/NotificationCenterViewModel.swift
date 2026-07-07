@@ -86,13 +86,7 @@ final class NotificationCenterViewModel: ObservableObject {
         var newItems = items
 
         if let source, let index = newItems.firstIndex(where: { $0.source == source }) {
-            // Coalesce: update content in place, re-mark unread, refresh timestamp, promote to head.
-            newItems[index].title = payload.title
-            newItems[index].summary = payload.summary
-            newItems[index].level = payload.level
-            newItems[index].icon = payload.icon
-            newItems[index].receivedAt = now()
-            newItems[index].read = false
+            newItems[index].apply(payload, receivedAt: now())
             let coalesced = newItems.remove(at: index)
             newItems.insert(coalesced, at: 0)
         } else {
