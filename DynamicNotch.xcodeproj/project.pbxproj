@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AAAA000000000000000000A4 /* NotificationContract in Frameworks */ = {isa = PBXBuildFile; productRef = AAAA000000000000000000A2 /* NotificationContract */; };
+		AAAA000000000000000000A5 /* NotificationContract in Frameworks */ = {isa = PBXBuildFile; productRef = AAAA000000000000000000A3 /* NotificationContract */; };
 		E20216532FE47F9F003C4033 /* Glur in Frameworks */ = {isa = PBXBuildFile; productRef = E20216522FE47F9F003C4033 /* Glur */; };
 		E2A100022F90000000000001 /* DynamicNotch/Resources/MediaRemoteAdapter/MediaRemoteAdapter.framework in Embed MediaRemote Adapter */ = {isa = PBXBuildFile; fileRef = E2A100012F90000000000001 /* DynamicNotch/Resources/MediaRemoteAdapter/MediaRemoteAdapter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E2C135B72F59FA8100348421 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = E2C135B62F59FA8100348421 /* Lottie */; };
@@ -115,6 +117,7 @@
 			files = (
 				E2C135B72F59FA8100348421 /* Lottie in Frameworks */,
 				E20216532FE47F9F003C4033 /* Glur in Frameworks */,
+				AAAA000000000000000000A4 /* NotificationContract in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -122,6 +125,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AAAA000000000000000000A5 /* NotificationContract in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -188,6 +192,7 @@
 			packageProductDependencies = (
 				E2C135B62F59FA8100348421 /* Lottie */,
 				E20216522FE47F9F003C4033 /* Glur */,
+				AAAA000000000000000000A2 /* NotificationContract */,
 			);
 			productName = DynamicNotch;
 			productReference = E2EF78512EDDB60E00F96D1E /* DynamicNotch.app */;
@@ -211,6 +216,7 @@
 			);
 			name = DynamicNotchTests;
 			packageProductDependencies = (
+				AAAA000000000000000000A3 /* NotificationContract */,
 			);
 			productName = DynamicNotchTests;
 			productReference = F10000000000000000000001 /* DynamicNotchTests.xctest */;
@@ -277,6 +283,7 @@
 			packageReferences = (
 				E2C135B52F59FA8100348421 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 				E20216512FE47F9F003C4033 /* XCRemoteSwiftPackageReference "Glur" */,
+				AAAA000000000000000000A1 /* XCLocalSwiftPackageReference "NotificationContract" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E2EF78522EDDB60E00F96D1E /* Products */;
@@ -765,6 +772,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		AAAA000000000000000000A1 /* XCLocalSwiftPackageReference "NotificationContract" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = NotificationContract;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		E20216512FE47F9F003C4033 /* XCRemoteSwiftPackageReference "Glur" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -785,6 +799,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		AAAA000000000000000000A2 /* NotificationContract */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AAAA000000000000000000A1 /* XCLocalSwiftPackageReference "NotificationContract" */;
+			productName = NotificationContract;
+		};
+		AAAA000000000000000000A3 /* NotificationContract */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AAAA000000000000000000A1 /* XCLocalSwiftPackageReference "NotificationContract" */;
+			productName = NotificationContract;
+		};
 		E20216522FE47F9F003C4033 /* Glur */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = E20216512FE47F9F003C4033 /* XCRemoteSwiftPackageReference "Glur" */;

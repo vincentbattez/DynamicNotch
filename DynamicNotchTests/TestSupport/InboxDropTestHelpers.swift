@@ -1,8 +1,12 @@
 import Foundation
+import NotificationContract
 
 // Shared filesystem helpers for inbox-monitor tests: make a throwaway inbox, drop files
-// atomically (temp + rename, mirroring the reference script so the watcher never observes a
-// half-written file), and count what is left behind.
+// atomically, and count what is left behind. The atomic write itself delegates to
+// `AtomicInboxDrop` — the same mechanism the CLI and app use — so there is no second
+// implementation to drift. These helpers still choose the *final* name (including dotfiles
+// and non-`.json`) so tests can feed the monitor adversarial drops the production path
+// would never produce.
 
 func makeTemporaryInboxDirectory() -> URL {
     let url = FileManager.default.temporaryDirectory
@@ -17,11 +21,14 @@ func atomicDrop(
     in directory: URL
 ) {
     let data = try! JSONSerialization.data(withJSONObject: payload)
-    try! data.write(to: directory.appendingPathComponent(name), options: .atomic)
+    try! AtomicInboxDrop.writeAtomically(data, to: directory.appendingPathComponent(name))
 }
 
 func atomicDropRaw(_ contents: String, named name: String, in directory: URL) {
-    try! Data(contents.utf8).write(to: directory.appendingPathComponent(name), options: .atomic)
+    try! AtomicInboxDrop.writeAtomically(
+        Data(contents.utf8),
+        to: directory.appendingPathComponent(name)
+    )
 }
 
 /// Eligible (non-dotfile) `.json` files still awaiting ingestion.
