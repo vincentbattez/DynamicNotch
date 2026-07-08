@@ -35,10 +35,7 @@ final class NotchHomePageEventsHandler {
         switch event {
         case .homePageOn:
             let notificationsEnabled = settingsViewModel.notifications.isEnabled
-            let activePages = settingsViewModel.homePage.homePageOrder.filter {
-                !settingsViewModel.homePage.homePageDisabled.contains($0) &&
-                ($0 != .notifications || notificationsEnabled)
-            }
+            let activePages = settingsViewModel.homePage.activePages(notificationsEnabled: notificationsEnabled)
             let activePage = activePages.first ?? .camera
             notchViewModel.send(.showLiveActivity(HomePageNotchContent(
                 notchViewModel: notchViewModel,

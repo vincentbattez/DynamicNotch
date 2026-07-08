@@ -33,8 +33,14 @@ final class HomePageSettingsStore: SettingsStoreBase {
         }
     }
     
+    func activePages(notificationsEnabled: Bool) -> [HomePages] {
+        homePageOrder.filter {
+            !homePageDisabled.contains($0) && ($0 != .notifications || notificationsEnabled)
+        }
+    }
+
     func resetHomePage() {
-        
+
     }
     
     override init(defaults: UserDefaults) {

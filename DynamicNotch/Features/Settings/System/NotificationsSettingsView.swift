@@ -4,6 +4,7 @@ internal import AppKit
 struct NotificationsSettingsView: View {
     @ObservedObject var settings: NotificationsSettingsStore
     @ObservedObject var notificationCenterViewModel: NotificationCenterViewModel
+    let inboxURL: URL
 
     var body: some View {
         SettingsPageScrollView {
@@ -28,7 +29,7 @@ struct NotificationsSettingsView: View {
     private var notificationsActions: some View {
         SettingsCard(title: "Inbox") {
             Button {
-                NSWorkspace.shared.open(NotificationsSettingsStore.inboxDirectory)
+                NSWorkspace.shared.open(inboxURL)
             } label: {
                 HStack {
                     Text("Reveal inbox in Finder")

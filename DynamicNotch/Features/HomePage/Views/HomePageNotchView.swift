@@ -79,17 +79,13 @@ struct HomePageNotchView: View {
         self.notificationsEnabled = notificationsEnabled
         self.initialPage = initialPage
 
-        let activePages = settings.homePageOrder.filter {
-            !settings.homePageDisabled.contains($0) && ($0 != .notifications || notificationsEnabled)
-        }
+        let activePages = settings.activePages(notificationsEnabled: notificationsEnabled)
         let pageToSelect = activePages.contains(initialPage) ? initialPage : (activePages.first ?? .camera)
         self._currentPage = State(initialValue: pageToSelect)
     }
 
     var body: some View {
-        let activePages = settings.homePageOrder.filter {
-            !settings.homePageDisabled.contains($0) && ($0 != .notifications || notificationsEnabled)
-        }
+        let activePages = settings.activePages(notificationsEnabled: notificationsEnabled)
         let isWaiting = isWaitingForSizeUpdate
         
         VStack(spacing: 8) {
@@ -160,9 +156,7 @@ struct HomePageNotchView: View {
             }
         }
         .onDisappear {
-            let activePages = settings.homePageOrder.filter {
-                !settings.homePageDisabled.contains($0) && ($0 != .notifications || notificationsEnabled)
-            }
+            let activePages = settings.activePages(notificationsEnabled: notificationsEnabled)
             notchViewModel.send(
                 .showLiveActivity(
                     HomePageNotchContent(

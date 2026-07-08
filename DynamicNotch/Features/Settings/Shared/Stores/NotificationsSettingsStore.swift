@@ -3,13 +3,6 @@ import Foundation
 
 @MainActor
 final class NotificationsSettingsStore: SettingsStoreBase {
-    /// The inbox directory where scripts drop notification JSON files.
-    static var inboxDirectory: URL {
-        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("DynamicNotch", isDirectory: true)
-            .appendingPathComponent("inbox", isDirectory: true)
-    }
-
     @Published var isEnabled: Bool {
         didSet { persist(isEnabled, for: GeneralSettingsStorage.Keys.notificationsEnabled) }
     }

@@ -530,7 +530,8 @@ struct SettingsRootView: View {
             detailContainer(for: section) {
                 NotificationsSettingsView(
                     settings: settingsViewModel.notifications,
-                    notificationCenterViewModel: notificationCenterViewModel
+                    notificationCenterViewModel: notificationCenterViewModel,
+                    inboxURL: AppContainer.notificationsInboxDirectory
                 )
             }
 
