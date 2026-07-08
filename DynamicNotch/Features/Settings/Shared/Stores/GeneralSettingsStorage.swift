@@ -130,6 +130,7 @@ enum GeneralSettingsStorage {
         static let homePageOrder = "settings.homePage.order"
         static let homePageDisabled = "settings.homePage.disabled"
         static let selectedVPNID = "settings.vpn.selectedID"
+        static let notificationsEnabled = "settings.notifications.enabled"
     }
 
     static let notchLiquidGlassVariantRange = 0...19
@@ -273,6 +274,7 @@ enum GeneralSettingsStorage {
         Keys.homePageLiveActivity: true,
         Keys.homePageOrder: ["camera", "localTimer", "vpn", "systemStats", "notifications"],
         Keys.homePageDisabled: [String](),
+        Keys.notificationsEnabled: true,
         Keys.selectedVPNID: "",
         Keys.calendarLiveActivity: true,
         Keys.calendarHideWhenFocused: true,

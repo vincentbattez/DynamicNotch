@@ -15,6 +15,16 @@ struct HomePageNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
     let homePages: HomePages
     let localTimerViewModel: LocalTimerViewModel
     let notificationCenterViewModel: NotificationCenterViewModel
+    let notificationsEnabled: Bool
+
+    init(notchViewModel: NotchViewModel, settings: HomePageSettingsStore, homePages: HomePages, localTimerViewModel: LocalTimerViewModel, notificationCenterViewModel: NotificationCenterViewModel, notificationsEnabled: Bool = true) {
+        self.notchViewModel = notchViewModel
+        self.settings = settings
+        self.homePages = homePages
+        self.localTimerViewModel = localTimerViewModel
+        self.notificationCenterViewModel = notificationCenterViewModel
+        self.notificationsEnabled = notificationsEnabled
+    }
     
     var priority: Int { NotchContentRegistry.HomePage.active.priority }
     var isExpandable: Bool { true }
@@ -138,6 +148,7 @@ struct HomePageNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
                 settings: settings,
                 localTimerViewModel: localTimerViewModel,
                 notificationCenterViewModel: notificationCenterViewModel,
+                notificationsEnabled: notificationsEnabled,
                 initialPage: homePages
             )
         )

@@ -27,6 +27,7 @@ struct SettingsRootView: View {
     let nowPlayingViewModel: NowPlayingViewModel
     let timerViewModel: TimerViewModel
     let lockScreenManager: LockScreenManager
+    let notificationCenterViewModel: NotificationCenterViewModel
 
     private let aboutWebsiteURL = URL(string: "https://dynamicnotch.evgeniy-petrukovich.workers.dev/download")!
     private let viewModel: SettingsRootViewModel
@@ -62,7 +63,8 @@ struct SettingsRootView: View {
         downloadViewModel: DownloadViewModel,
         nowPlayingViewModel: NowPlayingViewModel,
         timerViewModel: TimerViewModel,
-        lockScreenManager: LockScreenManager
+        lockScreenManager: LockScreenManager,
+        notificationCenterViewModel: NotificationCenterViewModel
     ) {
         self.powerService = powerService
         self.settingsViewModel = settingsViewModel
@@ -75,6 +77,7 @@ struct SettingsRootView: View {
         self.nowPlayingViewModel = nowPlayingViewModel
         self.timerViewModel = timerViewModel
         self.lockScreenManager = lockScreenManager
+        self.notificationCenterViewModel = notificationCenterViewModel
         let rootViewModel = SettingsRootViewModel(
             settingsViewModel: settingsViewModel,
             notchViewModel: notchViewModel,
@@ -521,6 +524,14 @@ struct SettingsRootView: View {
         case .lockScreen:
             detailContainer(for: section) {
                 LockScreenSettingsView(settings: settingsViewModel.lockScreen, applicationSettings: settingsViewModel.application)
+            }
+
+        case .notifications:
+            detailContainer(for: section) {
+                NotificationsSettingsView(
+                    settings: settingsViewModel.notifications,
+                    notificationCenterViewModel: notificationCenterViewModel
+                )
             }
 
 #if DEBUG

@@ -59,31 +59,37 @@ enum HomePages: String, CaseIterable, Hashable, Codable, Identifiable {
 
 struct HomePageNotchView: View {
     @Environment(\.isDynamicIsland) var isDynamicIsland
-    
+
     let notchViewModel: NotchViewModel
     let settings: HomePageSettingsStore
     let localTimerViewModel: LocalTimerViewModel
     let notificationCenterViewModel: NotificationCenterViewModel
+    let notificationsEnabled: Bool
     let initialPage: HomePages
 
     @State private var currentPage: HomePages?
     @State private var updateTask: Task<Void, Never>? = nil
     @State private var isWaitingForSizeUpdate = false
 
-    init(notchViewModel: NotchViewModel, settings: HomePageSettingsStore, localTimerViewModel: LocalTimerViewModel, notificationCenterViewModel: NotificationCenterViewModel, initialPage: HomePages) {
+    init(notchViewModel: NotchViewModel, settings: HomePageSettingsStore, localTimerViewModel: LocalTimerViewModel, notificationCenterViewModel: NotificationCenterViewModel, notificationsEnabled: Bool, initialPage: HomePages) {
         self.notchViewModel = notchViewModel
         self.settings = settings
         self.localTimerViewModel = localTimerViewModel
         self.notificationCenterViewModel = notificationCenterViewModel
+        self.notificationsEnabled = notificationsEnabled
         self.initialPage = initialPage
-        
-        let activePages = settings.homePageOrder.filter { !settings.homePageDisabled.contains($0) }
+
+        let activePages = settings.homePageOrder.filter {
+            !settings.homePageDisabled.contains($0) && ($0 != .notifications || notificationsEnabled)
+        }
         let pageToSelect = activePages.contains(initialPage) ? initialPage : (activePages.first ?? .camera)
         self._currentPage = State(initialValue: pageToSelect)
     }
-    
+
     var body: some View {
-        let activePages = settings.homePageOrder.filter { !settings.homePageDisabled.contains($0) }
+        let activePages = settings.homePageOrder.filter {
+            !settings.homePageDisabled.contains($0) && ($0 != .notifications || notificationsEnabled)
+        }
         let isWaiting = isWaitingForSizeUpdate
         
         VStack(spacing: 8) {
@@ -142,7 +148,8 @@ struct HomePageNotchView: View {
                             settings: settings,
                             homePages: newPage,
                             localTimerViewModel: localTimerViewModel,
-                            notificationCenterViewModel: notificationCenterViewModel
+                            notificationCenterViewModel: notificationCenterViewModel,
+                            notificationsEnabled: notificationsEnabled
                         )
                     )
                 )
@@ -153,7 +160,9 @@ struct HomePageNotchView: View {
             }
         }
         .onDisappear {
-            let activePages = settings.homePageOrder.filter { !settings.homePageDisabled.contains($0) }
+            let activePages = settings.homePageOrder.filter {
+                !settings.homePageDisabled.contains($0) && ($0 != .notifications || notificationsEnabled)
+            }
             notchViewModel.send(
                 .showLiveActivity(
                     HomePageNotchContent(
@@ -161,7 +170,8 @@ struct HomePageNotchView: View {
                         settings: settings,
                         homePages: activePages.first ?? .camera,
                         localTimerViewModel: localTimerViewModel,
-                        notificationCenterViewModel: notificationCenterViewModel
+                        notificationCenterViewModel: notificationCenterViewModel,
+                        notificationsEnabled: notificationsEnabled
                     )
                 )
             )
