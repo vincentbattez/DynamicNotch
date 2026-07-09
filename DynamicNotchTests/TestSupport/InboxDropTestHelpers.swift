@@ -31,13 +31,19 @@ func atomicDropRaw(_ contents: String, named name: String, in directory: URL) {
     )
 }
 
-/// Eligible (non-dotfile) `.json` files still awaiting ingestion.
-func eligibleJSONCount(in directory: URL) -> Int {
+/// Eligible (non-dotfile) `.json` files still awaiting ingestion — the same eligibility rule
+/// the monitor applies, in one place so drop tests and count checks can't drift.
+func eligibleJSONFiles(in directory: URL) -> [URL] {
     let urls = (try? FileManager.default.contentsOfDirectory(
         at: directory,
         includingPropertiesForKeys: nil
     )) ?? []
-    return urls.filter { $0.pathExtension == "json" && !$0.lastPathComponent.hasPrefix(".") }.count
+    return urls.filter { $0.pathExtension == "json" && !$0.lastPathComponent.hasPrefix(".") }
+}
+
+/// Count of eligible (non-dotfile) `.json` files still awaiting ingestion.
+func eligibleJSONCount(in directory: URL) -> Int {
+    eligibleJSONFiles(in: directory).count
 }
 
 /// Files quarantined in `inbox/rejected/`.
