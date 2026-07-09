@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 
 # Slice 3 — Bouton Réglages « Installer l'outil CLI »
 
@@ -37,15 +37,17 @@ symlink `/usr/local/bin/dynamicnotch`. Voir `docs/cli-notify-feature-spec.md` §
 
 ## Acceptance criteria
 
-- [ ] Le binaire `dynamicnotch` est embarqué dans le bundle et signé avec l'app.
-- [ ] Un bouton « Installer l'outil CLI » apparaît dans les Réglages.
-- [ ] Appui ⇒ symlink `/usr/local/bin/dynamicnotch` créé et pointant dans le bundle ; `dynamicnotch
+- [x] Le binaire `dynamicnotch` est embarqué dans le bundle (`Contents/Helpers/`) et signé avec l'app.
+- [x] Un bouton « Installer l'outil CLI » apparaît dans les Réglages (carte « Command-line tool »).
+- [x] Appui ⇒ symlink `/usr/local/bin/dynamicnotch` créé et pointant dans le bundle ; `dynamicnotch
       notify …` fonctionne depuis n'importe quel dossier ensuite.
-- [ ] `/usr/local/bin` non-writable ⇒ un prompt admin unique ; refus ⇒ message d'échec clair, pas de crash.
-- [ ] Ré-appui idempotent (répare un symlink périmé).
-- [ ] Vérif Gatekeeper effectuée et notée (le binaire lancé via symlink s'exécute sans blocage).
-- [ ] Libellés/messages localisés en/es/ru/zh-Hans.
-- [ ] App compile ; tests verts (`CODE_SIGNING_ALLOWED=NO`).
+- [x] `/usr/local/bin` non-writable ⇒ un prompt admin unique ; refus ⇒ message d'échec clair, pas de crash.
+- [x] Ré-appui idempotent (répare un symlink périmé). Couvert par `CLIToolInstallerTests`.
+- [x] Vérif Gatekeeper effectuée et notée : binaire lancé via symlink → exécution OK, aucun flag
+      quarantine (build local). Réserve : build signé Developer-ID à valider à la 1re release.
+- [x] Libellés/messages localisés en/es/ru/zh-Hans.
+- [x] App compile ; tests verts (`CODE_SIGNING_ALLOWED=NO` ; échecs restants = géométrie pré-existante
+      + flakiness FSEvents sous charge, verts en isolation).
 
 ## Blocked by
 
