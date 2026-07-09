@@ -1,9 +1,7 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "" : {
-
-    },
+    "" : {},
     "---" : {
       "localizations" : {
         "en" : {
@@ -32,9 +30,7 @@
         }
       }
     },
-    "--:--" : {
-
-    },
+    "--:--" : {},
     ", it is recommended to charge it." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -64,9 +60,7 @@
         }
       }
     },
-    ":" : {
-
-    },
+    ":" : {},
     "%@ is unavailable. Falling back to %@." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -96,12 +90,8 @@
         }
       }
     },
-    "%@%%" : {
-
-    },
-    "%lld" : {
-
-    },
+    "%@%%" : {},
+    "%lld" : {},
     "%lld%%" : {
       "localizations" : {
         "en" : {
@@ -130,12 +120,8 @@
         }
       }
     },
-    "00" : {
-
-    },
-    "00:10" : {
-
-    },
+    "00" : {},
+    "00:10" : {},
     "00:13:06" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -334,9 +320,7 @@
         }
       }
     },
-    "78%" : {
-
-    },
+    "78%" : {},
     "100%" : {
       "localizations" : {
         "en" : {
@@ -638,9 +622,7 @@
         }
       }
     },
-    "Adjust the thickness of the outline." : {
-
-    },
+    "Adjust the thickness of the outline." : {},
     "Adjust the transparency of the Dynamic Island outline." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -699,9 +681,7 @@
         }
       }
     },
-    "Adjust the transparency of the outline." : {
-
-    },
+    "Adjust the transparency of the outline." : {},
     "AirDrop" : {
       "localizations" : {
         "en" : {
@@ -817,9 +797,7 @@
         }
       }
     },
-    "AirPods Pro" : {
-
-    },
+    "AirPods Pro" : {},
     "All" : {
       "localizations" : {
         "en" : {
@@ -848,9 +826,7 @@
         }
       }
     },
-    "All Day" : {
-
-    },
+    "All Day" : {},
     "Allow gestures to bring back the most recently dismissed activity." : {
       "localizations" : {
         "en" : {
@@ -2287,9 +2263,7 @@
         }
       }
     },
-    "Camera is unavailable" : {
-
-    },
+    "Camera is unavailable" : {},
     "Carry notch context and media playback into the lock screen transition for a more cohesive experience." : {
       "localizations" : {
         "en" : {
@@ -3253,9 +3227,7 @@
         }
       }
     },
-    "Choose the background color used across the notch and Dynamic Island." : {
-
-    },
+    "Choose the background color used across the notch and Dynamic Island." : {},
     "Choose the background color used across the notch." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4020,9 +3992,7 @@
         }
       }
     },
-    "Choose which background will be displayed when playing media." : {
-
-    },
+    "Choose which background will be displayed when playing media." : {},
     "Choose which display Dynamic Notch should use." : {
       "localizations" : {
         "en" : {
@@ -6039,12 +6009,8 @@
         }
       }
     },
-    "Empty Location" : {
-
-    },
-    "Empty Title" : {
-
-    },
+    "Empty Location" : {},
+    "Empty Title" : {},
     "Enlarged" : {
       "localizations" : {
         "en" : {
@@ -8049,9 +8015,7 @@
         }
       }
     },
-    "Join Meeting" : {
-
-    },
+    "Join Meeting" : {},
     "Keep Now Playing visible in the notch while playback is paused." : {
       "localizations" : {
         "en" : {
@@ -9633,9 +9597,7 @@
         }
       }
     },
-    "No upcoming events" : {
-
-    },
+    "No upcoming events" : {},
     "No VPN configurations found" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -18168,9 +18130,7 @@
         }
       }
     },
-    "settings.title" : {
-
-    },
+    "settings.title" : {},
     "Short-lived overlays appear above live activities so quick system events still feel prominent." : {
       "localizations" : {
         "en" : {
@@ -18964,9 +18924,7 @@
         }
       }
     },
-    "Show stroke" : {
-
-    },
+    "Show stroke" : {},
     "Show synced lyrics next to the track cover when artwork is opened." : {
       "localizations" : {
         "en" : {
@@ -22235,9 +22193,7 @@
         }
       }
     },
-    "WireGuard VPN" : {
-
-    },
+    "WireGuard VPN" : {},
     "Without close timer" : {
       "localizations" : {
         "en" : {
@@ -22376,6 +22332,202 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "YouTube Music"
+          }
+        }
+      }
+    },
+    "Command-line tool" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Command-line tool"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Herramienta de línea de comandos"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Инструмент командной строки"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "命令行工具"
+          }
+        }
+      }
+    },
+    "Install the dynamicnotch command so scripts, cron jobs and Shortcuts can push notifications from any terminal." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Install the dynamicnotch command so scripts, cron jobs and Shortcuts can push notifications from any terminal."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instala el comando dynamicnotch para que scripts, tareas cron y Atajos puedan enviar notificaciones desde cualquier terminal."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Установите команду dynamicnotch, чтобы скрипты, задачи cron и «Быстрые команды» могли отправлять уведомления из любого терминала."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安装 dynamicnotch 命令，让脚本、cron 任务和快捷指令可以从任何终端推送通知。"
+          }
+        }
+      }
+    },
+    "Install CLI tool" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Install CLI tool"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalar herramienta CLI"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Установить CLI-инструмент"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安装命令行工具"
+          }
+        }
+      }
+    },
+    "Installed. dynamicnotch is now available on your PATH." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installed. dynamicnotch is now available on your PATH."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalado. dynamicnotch ya está disponible en tu PATH."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Установлено. dynamicnotch теперь доступен в вашем PATH."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已安装。dynamicnotch 现在已加入你的 PATH。"
+          }
+        }
+      }
+    },
+    "Installation was cancelled. Administrator permission is required." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installation was cancelled. Administrator permission is required."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se canceló la instalación. Se requiere permiso de administrador."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Установка отменена. Требуются права администратора."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安装已取消。需要管理员权限。"
+          }
+        }
+      }
+    },
+    "The command-line tool is missing from the app bundle." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The command-line tool is missing from the app bundle."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La herramienta de línea de comandos no se encuentra en el paquete de la app."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Инструмент командной строки отсутствует в пакете приложения."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用程序包中缺少命令行工具。"
+          }
+        }
+      }
+    },
+    "Installation failed. Check that /usr/local/bin is writable." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installation failed. Check that /usr/local/bin is writable."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La instalación falló. Comprueba que /usr/local/bin tenga permisos de escritura."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось установить. Убедитесь, что /usr/local/bin доступен для записи."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安装失败。请检查 /usr/local/bin 是否可写。"
           }
         }
       }
