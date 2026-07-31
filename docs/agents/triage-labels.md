@@ -12,6 +12,9 @@ The skills speak in terms of five canonical triage roles. This file maps those r
 
 When a skill mentions a role (e.g. "apply the AFK-ready triage label"), use the corresponding label string from this table.
 
-For local-markdown issues, the label is written as a `Status:` line near the top of the issue file (see `issue-tracker.md`).
+These are **Linear issue labels**, not workflow states — all five already exist in the
+`Vincentbattez` workspace. Apply them with `save_issue` (`labels: [...]`); never create a
+near-duplicate. Workflow states (Backlog, In Progress, Done…) stay orthogonal: a triage label
+says whether the issue is *ready*, the state says whether it's *started*.
 
 Edit the right-hand column to match whatever vocabulary you actually use.

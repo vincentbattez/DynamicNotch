@@ -22,7 +22,7 @@ xcodebuild -project DynamicNotch.xcodeproj -scheme DynamicNotch -configuration D
 
 ### Issue tracker
 
-Issues live as markdown files under `.scratch/<feature>/` in this repo. See `docs/agents/issue-tracker.md`.
+Issues live in Linear — team `Vincentbattez` (`VIN-*`), project `DynamicNotch`. New work is also mirrored as a Things 3 task via the `things3` skill — the root of a work item only, never its children. Read `docs/agents/issue-tracker.md` before creating any issue.
 
 ### Triage labels
 

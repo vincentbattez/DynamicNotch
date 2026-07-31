@@ -1,5 +1,8 @@
 # L'Inbox est l'unique point d'entrée externe des Notifications
 
+> **Portée : les Notifications.** Les **Commands** (impératifs périssables, ex. démarrer un Local
+> timer) passent par un dossier frère — voir [ADR-0002](./0002-commandes-perissables-hors-inbox.md).
+
 Les process externes (scripts, cron, CI, Raccourcis via action shell) créent une Notification en
 déposant un Payload JSON dans un dossier surveillé — l'**Inbox**
 (`~/Library/Application Support/DynamicNotch/inbox`) — via une écriture atomique (temp `.`-préfixé →
