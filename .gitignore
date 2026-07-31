@@ -25,3 +25,6 @@ build/
 
 # Local issue tracker / scratch
 .scratch/
+
+# Node tooling (sandcastle orchestrator)
+node_modules/

@@ -1,0 +1,27 @@
+{
+  "linear": {
+    "project": "DynamicNotch",
+    "label": "ready-for-agent",
+    "reviewState": "In Review"
+  },
+  "git": {
+    "remote": "origin",
+    "baseBranch": "main",
+    "branchPrefix": "sandcastle/issue-",
+    "repo": "vincentbattez/DynamicNotch"
+  },
+  "agent": {
+    "model": "claude-opus-4-8",
+    "retryRounds": 2,
+    "implementIterations": 25
+  },
+  "sandbox": {
+    "installCommand": "xcodebuild -resolvePackageDependencies -project DynamicNotch.xcodeproj",
+    "copyToWorktree": []
+  },
+  "project": {
+    "verifyCommands": ["./scripts/sandcastle-verify.sh"],
+    "commitPrefix": "RALPH:",
+    "codingStandardsFile": ".sandcastle/CODING_STANDARDS.md"
+  }
+}

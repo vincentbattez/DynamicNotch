@@ -4,7 +4,7 @@ import NotificationContract
 
 /// `dynamicnotch` — a thin CLI over the inbox file-drop contract. It builds a valid
 /// `NotificationPayload` and drops it atomically, so scripts never hand-roll JSON escaping
-/// or the temp-file `rename` dance. See `docs/cli-notify-feature-spec.md`.
+/// or the temp-file `rename` dance.
 @main
 struct DynamicNotchCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
