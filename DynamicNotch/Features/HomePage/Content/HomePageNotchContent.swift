@@ -106,6 +106,10 @@ struct HomePageNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
             return .init(width: baseWidth + 140, height: baseHeight + 110)
 
         case .notifications:
+            if notificationCenterViewModel.isDetailPresented {
+                let measured = notificationCenterViewModel.detailContentHeight
+                return .init(width: baseWidth + 210, height: measured > 0 ? measured : baseHeight + 205)
+            }
             return .init(width: baseWidth + 170, height: baseHeight + 130)
         }
     }
@@ -136,6 +140,10 @@ struct HomePageNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
             return .init(width: baseWidth + 180, height: baseHeight + 125)
 
         case .notifications:
+            if notificationCenterViewModel.isDetailPresented {
+                let measured = notificationCenterViewModel.detailContentHeight
+                return .init(width: baseWidth + 240, height: measured > 0 ? measured : baseHeight + 205)
+            }
             return .init(width: baseWidth + 200, height: baseHeight + 130)
         }
     }
