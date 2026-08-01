@@ -125,6 +125,18 @@ final class CLIToolInstallerTests: XCTestCase {
         XCTAssertEqual(CLIToolInstaller.installState(target: target, expectedBinary: expected), .foreign)
     }
 
+    func testSymlinkToBackupCopyInsideBundleIsForeign() throws {
+        let expected = bundleBinary(named: "DynamicNotch.app")
+        try makeExecutable(at: expected)
+        // Embeds the owned segment but does not end with it — must stay on the protected side.
+        let backup = expected.deletingLastPathComponent().appendingPathComponent("dynamicnotch.bak")
+        try makeExecutable(at: backup)
+        let target = workingDirectory.appendingPathComponent("bin/dynamicnotch")
+        try CLIToolInstaller.createSymlink(from: backup, at: target)
+
+        XCTAssertEqual(CLIToolInstaller.installState(target: target, expectedBinary: expected), .foreign)
+    }
+
     func testRegularFileAtTargetIsForeign() throws {
         let expected = bundleBinary(named: "DynamicNotch.app")
         try makeExecutable(at: expected)
