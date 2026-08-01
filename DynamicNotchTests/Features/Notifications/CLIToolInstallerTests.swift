@@ -71,6 +71,79 @@ final class CLIToolInstallerTests: XCTestCase {
         XCTAssertEqual(destination, source.path)
     }
 
+    // MARK: - installState classification
+
+    func testAbsentTargetIsClassifiedAbsent() throws {
+        let expected = bundleBinary(named: "DynamicNotch.app")
+        let target = workingDirectory.appendingPathComponent("bin/dynamicnotch")
+
+        XCTAssertEqual(CLIToolInstaller.installState(target: target, expectedBinary: expected), .absent)
+    }
+
+    func testSymlinkToExpectedBinaryIsInstalledCurrent() throws {
+        let expected = bundleBinary(named: "DynamicNotch.app")
+        try makeExecutable(at: expected)
+        let target = workingDirectory.appendingPathComponent("bin/dynamicnotch")
+        try CLIToolInstaller.createSymlink(from: expected, at: target)
+
+        XCTAssertEqual(CLIToolInstaller.installState(target: target, expectedBinary: expected), .installedCurrent)
+    }
+
+    func testSymlinkToSameBinaryInOtherBundleIsInstalledOther() throws {
+        let expected = bundleBinary(named: "current/DynamicNotch.app")
+        try makeExecutable(at: expected)
+        let other = bundleBinary(named: "moved/DynamicNotch.app")
+        try makeExecutable(at: other)
+        let target = workingDirectory.appendingPathComponent("bin/dynamicnotch")
+        try CLIToolInstaller.createSymlink(from: other, at: target)
+
+        XCTAssertEqual(CLIToolInstaller.installState(target: target, expectedBinary: expected), .installedOther)
+    }
+
+    func testDanglingSymlinkToOldBundleIsInstalledOther() throws {
+        let expected = bundleBinary(named: "current/DynamicNotch.app")
+        try makeExecutable(at: expected)
+        let old = bundleBinary(named: "old/DynamicNotch.app")
+        try makeExecutable(at: old)
+        let target = workingDirectory.appendingPathComponent("bin/dynamicnotch")
+        try CLIToolInstaller.createSymlink(from: old, at: target)
+        // Remove the old bundle so the link dangles — an updated/moved app must still repair it.
+        try FileManager.default.removeItem(at: workingDirectory.appendingPathComponent("old"))
+
+        XCTAssertEqual(CLIToolInstaller.installState(target: target, expectedBinary: expected), .installedOther)
+    }
+
+    func testSymlinkOutsideDynamicNotchBundleIsForeign() throws {
+        let expected = bundleBinary(named: "DynamicNotch.app")
+        try makeExecutable(at: expected)
+        // A Homebrew-style install: a symlink to an executable that is not inside a .app bundle.
+        let foreign = workingDirectory.appendingPathComponent("homebrew/bin/dynamicnotch")
+        try makeExecutable(at: foreign)
+        let target = workingDirectory.appendingPathComponent("bin/dynamicnotch")
+        try CLIToolInstaller.createSymlink(from: foreign, at: target)
+
+        XCTAssertEqual(CLIToolInstaller.installState(target: target, expectedBinary: expected), .foreign)
+    }
+
+    func testRegularFileAtTargetIsForeign() throws {
+        let expected = bundleBinary(named: "DynamicNotch.app")
+        try makeExecutable(at: expected)
+        let target = workingDirectory.appendingPathComponent("bin/dynamicnotch")
+        try FileManager.default.createDirectory(
+            at: target.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try Data("#!/bin/sh\n".utf8).write(to: target)
+
+        XCTAssertEqual(CLIToolInstaller.installState(target: target, expectedBinary: expected), .foreign)
+    }
+
+    private func bundleBinary(named bundle: String) -> URL {
+        workingDirectory
+            .appendingPathComponent(bundle)
+            .appendingPathComponent("Contents/Helpers/dynamicnotch")
+    }
+
     private func makeExecutable(at url: URL) throws {
         try FileManager.default.createDirectory(
             at: url.deletingLastPathComponent(),

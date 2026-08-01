@@ -183,7 +183,11 @@ private enum SettingsSectionCatalog {
                     "language",
                     "display",
                     "full screen",
-                    "fullscreen"
+                    "fullscreen",
+                    "cli",
+                    "command line",
+                    "terminal",
+                    "dynamicnotch"
                 ],
                 systemImage: "gear",
                 imageName: nil,

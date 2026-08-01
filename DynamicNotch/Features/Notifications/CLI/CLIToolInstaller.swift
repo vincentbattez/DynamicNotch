@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 
 /// Installs the `dynamicnotch` CLI (embedded in the app bundle at `Contents/Helpers/`) onto the
 /// user's `PATH` by symlinking it at `/usr/local/bin/dynamicnotch`. The symlink points **into the
@@ -11,6 +12,28 @@ import Foundation
 enum CLIToolInstaller {
     /// Where the symlink lands so `dynamicnotch` is reachable from any shell.
     static let symlinkPath = "/usr/local/bin/dynamicnotch"
+
+    private static let logger = Logger(subsystem: "com.dynamicnotch.app", category: "CLIToolInstaller")
+
+    /// Classification of what currently occupies the symlink target. This is the single source of
+    /// truth shared by the silent launch attempt and the Settings row label — they can never
+    /// diverge because both derive their decision from this one pure function.
+    enum InstallState: Equatable {
+        /// Nothing at the target — the automatic path creates the link; the button reads `Install`.
+        case absent
+        /// A symlink into the current bundle — nothing to do; the button reads `Installed`, disabled.
+        case installedCurrent
+        /// A symlink (possibly dangling) into *another* DynamicNotch bundle — a moved/updated/old
+        /// build. The automatic path re-points it; the button reads `Repair`.
+        case installedOther
+        /// A regular file or a symlink that does not look like ours (Homebrew, manual copy). The
+        /// automatic path never touches it; the button reads `Install` and shows a warning.
+        case foreign
+    }
+
+    /// The in-bundle path segment identifying a `dynamicnotch` symlink that belongs to us: the
+    /// embedded binary always lives at `…/Something.app/Contents/Helpers/dynamicnotch`.
+    private static let ownedBundleSuffix = ".app/Contents/Helpers/dynamicnotch"
 
     /// Semantic result of an install attempt. The view maps each case to a localized message —
     /// the installer stays free of SwiftUI and localization so it can be exercised in tests.
@@ -50,6 +73,54 @@ enum CLIToolInstaller {
             return .installed
         } catch {
             return installWithPrivileges(source: source)
+        }
+    }
+
+    /// Classifies what sits at `target` relative to `expectedBinary` (the embedded CLI of the
+    /// running bundle). Pure and parameterised on URLs so it is testable against a temp directory —
+    /// this is the one seam the spec asks to cover. Compares the *raw* symlink destination against
+    /// `expectedBinary.path` with no symlink resolution on either side, so a temp path under
+    /// `/var` (→ `/private/var`) never spuriously mismatches.
+    static func installState(target: URL, expectedBinary: URL) -> InstallState {
+        let fileManager = FileManager.default
+
+        guard let destination = try? fileManager.destinationOfSymbolicLink(atPath: target.path) else {
+            // Not a symlink: either a regular file/dir (foreign) or genuinely absent.
+            return fileManager.fileExists(atPath: target.path) ? .foreign : .absent
+        }
+
+        if destination == expectedBinary.path {
+            return .installedCurrent
+        }
+        // Dangling links still report their stored destination, so an old/moved bundle lands here.
+        return destination.contains(ownedBundleSuffix) ? .installedOther : .foreign
+    }
+
+    /// Convenience over `installState` bound to the running bundle and the real symlink target.
+    static func currentInstallState() -> InstallState {
+        installState(target: URL(fileURLWithPath: symlinkPath), expectedBinary: embeddedBinaryURL)
+    }
+
+    /// Silent best-effort install run at every launch. Never escalates and never destroys a
+    /// `foreign` file — it creates or repairs the link only when the classification allows, and
+    /// stays completely quiet otherwise (a failure leaves only a log line for diagnostics). Also
+    /// self-guards against any test host: no suite must ever write to `/usr/local/bin`.
+    static func installAutomaticallyIfPossible() {
+        guard ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else { return }
+
+        let source = embeddedBinaryURL
+        guard FileManager.default.isExecutableFile(atPath: source.path) else { return }
+
+        let target = URL(fileURLWithPath: symlinkPath)
+        switch installState(target: target, expectedBinary: source) {
+        case .installedCurrent, .foreign:
+            return
+        case .absent, .installedOther:
+            do {
+                try createSymlink(from: source, at: target)
+            } catch {
+                logger.error("Silent CLI install failed: \(error.localizedDescription, privacy: .public)")
+            }
         }
     }
 
