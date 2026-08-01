@@ -56,6 +56,6 @@ final class CommandRouter {
         if localTimerViewModel.state != .stopped {
             localTimerViewModel.stop()
         }
-        localTimerViewModel.start(endsAt: endsAt, label: label)
+        localTimerViewModel.start(endsAt: endsAt, now: now(), label: label)
     }
 }
