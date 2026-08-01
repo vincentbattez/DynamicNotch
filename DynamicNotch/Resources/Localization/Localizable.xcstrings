@@ -1132,6 +1132,34 @@
         }
       }
     },
+    "Another file already occupies this location; installing will replace it." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Another file already occupies this location; installing will replace it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otro archivo ya ocupa esta ubicación; instalar lo reemplazará."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это расположение уже занято другим файлом; установка заменит его."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此位置已被另一个文件占用；安装将会替换它。"
+          }
+        }
+      }
+    },
     "Any source" : {
       "localizations" : {
         "en" : {
@@ -4913,62 +4941,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已安装"
-          }
-        }
-      }
-    },
-    "Repair" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repair"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reparar"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Восстановить"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "修复"
-          }
-        }
-      }
-    },
-    "Another file already occupies this location; installing will replace it." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Another file already occupies this location; installing will replace it."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Otro archivo ya ocupa esta ubicación; instalar lo reemplazará."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Это расположение уже занято другим файлом; установка заменит его."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "此位置已被另一个文件占用；安装将会替换它。"
           }
         }
       }
@@ -12525,6 +12497,34 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "从展开的播放器控件中移除输出设备按钮。"
+          }
+        }
+      }
+    },
+    "Repair" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repair"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reparar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Восстановить"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "修复"
           }
         }
       }
