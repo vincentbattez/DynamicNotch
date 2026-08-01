@@ -43,15 +43,18 @@ final class CLITimerIntegrationTests: XCTestCase {
         let before = Date()
         let status = try runCLI(["timer", "start", "--duration", "1500"], commands: commands)
         XCTAssertEqual(status, 0)
+        let after = Date()
 
         let file = try XCTUnwrap(eligibleJSONFiles(in: commands).first)
         let decoded = try JSONDecoder().decode(CommandPayload.self, from: Data(contentsOf: file))
         guard case let .timerStart(endsAt, label) = decoded else {
             return XCTFail("expected timerStart")
         }
-        // Resolved CLI-side to now+1500, so it sits comfortably in the future.
-        XCTAssertGreaterThan(endsAt.timeIntervalSince(before), 1490)
-        XCTAssertLessThan(endsAt.timeIntervalSince(before), 1510)
+        // Resolved CLI-side to its own now+1500, which lies between our two bookends.
+        // Bounding against `after` keeps this stable however slow the process launch is.
+        // The epsilon absorbs the JSON round-trip of the epoch, nothing more.
+        XCTAssertGreaterThanOrEqual(endsAt.timeIntervalSince(before), 1500 - 0.001)
+        XCTAssertLessThanOrEqual(endsAt.timeIntervalSince(after), 1500 + 0.001)
         XCTAssertNil(label)
     }
 
