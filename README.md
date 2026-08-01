@@ -189,6 +189,49 @@ tmp=$(mktemp "${INBOX}/.XXXXXX.json") \
 > the app ingests the first can collide and lose a notification. The `dynamicnotch` CLI avoids this
 > by generating a unique filename for every invocation — prefer it under bursty load.
 
+### Starting the Local timer
+
+A **Command** is not a Notification: it *acts* and *perishes* where a Notification *informs* and
+*lasts*. `dynamicnotch timer start` drops a Command into a sibling folder of the inbox
+(`~/Library/Application Support/DynamicNotch/commands/`); the app starts the **Local timer** and
+shows its **Label** under the countdown on the notch.
+
+```bash
+# End at an absolute instant (epoch seconds) — the timer finishes at the real time,
+# whatever the ingestion lag. Ideal from a calendar/Raycast focus script.
+dynamicnotch timer start --until 1712345678 --label "Fixer bug Léa"
+
+# Or a plain duration in whole seconds (a 25-minute pomodoro).
+dynamicnotch timer start --duration 1500 --label "Pomodoro"
+```
+
+| Flag | Required | Description |
+|------|----------|-------------|
+| `--until` | **Yes\*** | Absolute end instant: epoch seconds or ISO8601. *\*Exactly one of `--until` **or** `--duration`.* |
+| `--duration` | **Yes\*** | Whole seconds from now until the timer ends. Resolved to an absolute instant **before** the drop, so the emit→ingest lag never taints the result. |
+| `--label` | No | Name shown under the countdown (and in place of the word "Timer" when expanded). Blank ≡ absent. |
+
+Rules:
+
+- **Expiry.** `endsAt` is absolute, so a command whose end is already past is ingested and then
+  **discarded without effect** — a timer arrived too late must never lie about the time left. A past
+  `--until` is *not* a usage error: the CLI drops, the app decides.
+- **Coalescence.** A new command **replaces** a running Local timer, so two back-to-back events
+  don't fight over the surface.
+- **The macOS Clock timer wins.** While a Clock (Horloge) timer runs, a `timer start` command starts
+  nothing and the app pushes a `warning` Notification instead — you never face a blank notch.
+- The CLI exits `0` once the file is dropped (never blocks on the app), or non-zero on an argument
+  error (both time flags, neither, or a non-positive `--duration`).
+
+> Keep the notch from ever failing a script: guard the call so a missing binary can't trip
+> `set -euo pipefail`.
+>
+> ```sh
+> if [ -x "$(command -v dynamicnotch)" ]; then
+>   dynamicnotch timer start --until "$END_EPOCH" --label "$TITLE" || true
+> fi
+> ```
+
 ### Enabling the feature
 
 Open **Settings → Notifications** and flip the single **Notifications** toggle. This activates
