@@ -9,7 +9,11 @@ import OSLog
 /// overwrite semantics are unit-testable against a temp directory. The privilege escalation
 /// (`installWithPrivileges`) is process/UI glue — a single `osascript … with administrator
 /// privileges` prompt used only when `/usr/local/bin` isn't directly writable.
-enum CLIToolInstaller {
+///
+/// `nonisolated` because the module defaults to `MainActor` isolation while every entry point here
+/// is blocking filesystem/process work meant to run off the main thread — the launch attempt and
+/// the Settings button both call it from a detached task.
+nonisolated enum CLIToolInstaller {
     /// Where the symlink lands so `dynamicnotch` is reachable from any shell.
     static let symlinkPath = "/usr/local/bin/dynamicnotch"
 
@@ -93,7 +97,9 @@ enum CLIToolInstaller {
             return .installedCurrent
         }
         // Dangling links still report their stored destination, so an old/moved bundle lands here.
-        return destination.contains(ownedBundleSuffix) ? .installedOther : .foreign
+        // `hasSuffix`, not `contains`: a path that merely embeds the segment (a `…/dynamicnotch.bak`
+        // backup) is not ours, and an unrecognised link must fall on the protected `foreign` side.
+        return destination.hasSuffix(ownedBundleSuffix) ? .installedOther : .foreign
     }
 
     /// Convenience over `installState` bound to the running bundle and the real symlink target.
