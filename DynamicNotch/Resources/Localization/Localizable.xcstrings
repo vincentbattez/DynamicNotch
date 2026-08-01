@@ -4861,30 +4861,114 @@
         }
       }
     },
-    "Install CLI tool" : {
+    "Install" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Install CLI tool"
+            "value" : "Install"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Instalar herramienta CLI"
+            "value" : "Instalar"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Установить CLI-инструмент"
+            "value" : "Установить"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "安装命令行工具"
+            "value" : "安装"
+          }
+        }
+      }
+    },
+    "Installed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installed"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalado"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Установлено"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已安装"
+          }
+        }
+      }
+    },
+    "Repair" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repair"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reparar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Восстановить"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "修复"
+          }
+        }
+      }
+    },
+    "Another file already occupies this location; installing will replace it." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Another file already occupies this location; installing will replace it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otro archivo ya ocupa esta ubicación; instalar lo reemplazará."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это расположение уже занято другим файлом; установка заменит его."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此位置已被另一个文件占用；安装将会替换它。"
           }
         }
       }
@@ -15610,25 +15694,25 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Manage launch options, Dock, and menu bar icon visibility."
+            "value" : "Manage launch options, Dock, menu bar icon, and the command-line tool."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Administrar opciones de inicio, visibilidad del Dock y del icono de la barra de menú."
+            "value" : "Administrar opciones de inicio, Dock, icono de la barra de menú y la herramienta de línea de comandos."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Управление параметрами запуска, отображением в Dock и строке меню."
+            "value" : "Управление параметрами запуска, Dock, значком в строке меню и инструментом командной строки."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "管理启动选项、Dock 和菜单栏图标的显示。"
+            "value" : "管理启动选项、Dock、菜单栏图标和命令行工具。"
           }
         }
       }

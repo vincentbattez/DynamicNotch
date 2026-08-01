@@ -95,7 +95,7 @@ enum SettingsSubPage: Hashable, Identifiable {
         case .appearance: return "Choose the interface appearance used by the app."
         case .notch: return "Appearance, animation, and resize feedback."
         case .language: return "Choose the application interface language."
-        case .system: return "Manage launch options, Dock, and menu bar icon visibility."
+        case .system: return "Manage launch options, Dock, menu bar icon, and the command-line tool."
         case .permissions: return "Manage system permissions and access settings."
         case .softwareUpdate: return "Check for updates and manage update preferences."
         case .support: return "Support the project development and donations."
