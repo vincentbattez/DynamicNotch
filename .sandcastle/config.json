@@ -2,6 +2,7 @@
   "linear": {
     "project": "DynamicNotch",
     "label": "ready-for-agent",
+    "startedState": "In Progress",
     "reviewState": "In Review"
   },
   "git": {

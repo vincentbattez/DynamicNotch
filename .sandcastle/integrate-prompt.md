@@ -2,8 +2,12 @@
 
 You are assembling the integration branch for feature **{{ROOT_ID}} — {{ROOT_TITLE}}**.
 
-You are already on branch `{{INTEGRATION_BRANCH}}`, freshly created from
-`{{BASE_BRANCH}}`. Merge the following branches into it, in the order given:
+You are already on branch `{{INTEGRATION_BRANCH}}`, created from `{{BASE_BRANCH}}`
+and carrying a single empty commit — the placeholder the orchestrator pushed to
+open this feature's draft pull request. Leave it alone: never reset, rebase or
+squash this branch, the remote already has it.
+
+Merge the following branches into it, in the order given:
 
 {{BRANCHES}}
 

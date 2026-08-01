@@ -9,16 +9,22 @@
 // leaf. With no arguments, every eligible root in the project is worked.
 //
 // Per root, independently of the others:
-//   1. Plan     — an opus agent groups the remaining leaves into dependency waves.
-//   2. Execute  — one sandbox per leaf, branched from the base branch.
+//   1. Announce — cut the integration branch on an empty commit, open a draft PR
+//                 and move the feature to `linear.startedState`, so Linear shows
+//                 it in progress with a link to the work from the first minute.
+//                 One PR per feature — never per leaf.
+//   2. Plan     — an opus agent groups the remaining leaves into dependency waves.
+//   3. Execute  — one sandbox per leaf, branched from the base branch.
 //                 Implementer, then reviewer if the implementer committed.
 //                 Waves run in order, and so do the leaves inside a wave —
 //                 agents share one host, one screen and one Xcode here.
-//   3. Retry    — up to `agent.retryRounds` rounds, re-planning what is left.
-//   4. Ship     — only when every eligible leaf landed: an agent assembles the
-//                 integration branch, then the host pushes it and opens a PR.
+//   4. Retry    — up to `agent.retryRounds` rounds, re-planning what is left.
+//   5. Ship     — only when every eligible leaf landed: an agent assembles the
+//                 integration branch, then the host pushes it and takes the
+//                 announced PR out of draft.
 //
-// A root that never completes ships nothing; the other roots are unaffected.
+// A root that never completes ships nothing — its draft PR and branch are torn
+// down again. The other roots are unaffected.
 
 import * as sandcastle from "@ai-hero/sandcastle";
 import { noSandbox } from "@ai-hero/sandcastle/sandboxes/no-sandbox";
@@ -26,10 +32,15 @@ import { z } from "zod";
 import { config, checkedPromptArgs } from "./lib/config.mts";
 import {
   branchHasCommits,
+  closePullRequest,
+  createEmptyBranch,
   createPullRequest,
+  deleteBranch,
+  markPullRequestReady,
   nextIntegrationBranch,
   pushBranch,
   supersedePreviousPrs,
+  updatePullRequest,
 } from "./lib/github.mts";
 import {
   discoverRootIds,
@@ -263,6 +274,76 @@ function issuesToClose(root: Root, worked: Issue[]): Issue[] {
   });
 }
 
+interface Announcement {
+  branch: string;
+  prUrl: string;
+}
+
+function draftPullRequestBody(root: Root): string {
+  return [
+    `🏗️ Sandcastle is working on [${root.issue.id}](${root.issue.url}) — ${root.issue.title}.`,
+    "This pull request is a placeholder: it is opened empty when the run starts, and filled in once every issue below has landed.",
+    ["## Issues", ...root.eligibleLeaves.map((leaf) => `- ${leaf.id}: ${leaf.title}`)].join("\n"),
+    `Ref ${root.issue.id}`,
+  ].join("\n\n");
+}
+
+/**
+ * Open the feature's pull request before any code exists, so Linear links the
+ * issue to the work as soon as an agent picks it up. GitHub rejects a head that
+ * is not ahead of its base, hence the empty commit.
+ *
+ * Feature-level only: leaves get branches, never pull requests.
+ */
+async function announce(root: Root): Promise<Announcement> {
+  const { id } = root.issue;
+  const branch = await nextIntegrationBranch(id);
+
+  await createEmptyBranch(branch, `${config.project.commitPrefix} start ${id}`);
+  await pushBranch(branch);
+
+  let prUrl: string;
+  try {
+    prUrl = await createPullRequest({
+      branch,
+      title: `[WIP] ${id}: ${root.issue.title}`,
+      body: draftPullRequestBody(root),
+      draft: true,
+    });
+  } catch (cause) {
+    await deleteBranch(branch); // don't strand a branch nothing points at
+    throw cause;
+  }
+
+  console.log(`[${id}] draft pull request opened: ${prUrl}`);
+
+  const superseded = await supersedePreviousPrs(id, branch, prUrl);
+  for (const number of superseded) {
+    console.log(`[${id}] closed superseded PR #${number}`);
+  }
+
+  // A nicety, not the deliverable: Linear's own GitHub integration usually does
+  // this too, and a workspace without the `startedState` must not kill the run.
+  try {
+    await setState(id, config.linear.startedState);
+  } catch (cause) {
+    console.error(`[${id}] could not move to ${config.linear.startedState}: ${cause}`);
+  }
+
+  return { branch, prUrl };
+}
+
+/** Nothing shipped — take the placeholder back down rather than leave a dead PR open. */
+async function withdraw(root: Root, announced: Announcement, why: string) {
+  try {
+    await closePullRequest(announced.prUrl, `Sandcastle withdrew this run — ${why}.`);
+    console.log(`[${root.issue.id}] withdrew ${announced.prUrl}`);
+  } catch (cause) {
+    console.error(`[${root.issue.id}] could not close ${announced.prUrl}: ${cause}`);
+  }
+  await deleteBranch(announced.branch);
+}
+
 function pullRequestBody(root: Root, worked: Issue[]): string {
   const sections = [root.issue.description.trim() || `See ${root.issue.url}.`];
 
@@ -293,8 +374,13 @@ function pullRequestBody(root: Root, worked: Issue[]): string {
   return sections.join("\n\n");
 }
 
-async function ship(root: Root, branches: string[], worked: Issue[]) {
-  const branch = await nextIntegrationBranch(root.issue.id);
+async function ship(
+  root: Root,
+  announced: Announcement,
+  branches: string[],
+  worked: Issue[],
+) {
+  const { branch, prUrl } = announced;
   console.log(`[${root.issue.id}] assembling ${branch}`);
 
   const sandbox = await sandcastle.createSandbox({
@@ -332,13 +418,15 @@ async function ship(root: Root, branches: string[], worked: Issue[]) {
 
   await pushBranch(branch);
 
-  const url = await createPullRequest({
-    branch,
+  // The pull request already exists — it was opened empty when the feature
+  // started. Shipping fills it in and takes it out of draft.
+  await updatePullRequest(prUrl, {
     title: `${root.issue.id}: ${root.issue.title}`,
     body: pullRequestBody(root, worked),
   });
+  await markPullRequestReady(prUrl);
 
-  const superseded = await supersedePreviousPrs(root.issue.id, branch, url);
+  const superseded = await supersedePreviousPrs(root.issue.id, branch, prUrl);
   for (const number of superseded) {
     console.log(`[${root.issue.id}] closed superseded PR #${number}`);
   }
@@ -347,7 +435,7 @@ async function ship(root: Root, branches: string[], worked: Issue[]) {
     await setState(issue.id, config.linear.reviewState);
   }
 
-  return url;
+  return prUrl;
 }
 
 // ---------------------------------------------------------------------------
@@ -368,6 +456,7 @@ async function runRoot(root: Root): Promise<string | null> {
     return null;
   }
 
+  const announced = await announce(root);
   const landed = new Set<string>();
 
   for (let iteration = 1; iteration <= config.agent.retryRounds; iteration++) {
@@ -412,8 +501,9 @@ async function runRoot(root: Root): Promise<string | null> {
 
   if (missing.length > 0) {
     console.error(
-      `[${id}] incomplete — blocked on ${missing.map((l) => l.id).join(", ")}. No branch pushed, no PR opened.`,
+      `[${id}] incomplete — blocked on ${missing.map((l) => l.id).join(", ")}. Nothing merged into ${announced.branch}.`,
     );
+    await withdraw(root, announced, `blocked on ${missing.map((l) => l.id).join(", ")}`);
     return null;
   }
 
@@ -428,10 +518,11 @@ async function runRoot(root: Root): Promise<string | null> {
 
   if (branches.length === 0) {
     console.log(`[${id}] every issue completed without producing commits.`);
+    await withdraw(root, announced, "every issue completed without producing commits");
     return null;
   }
 
-  return ship(root, branches, worked);
+  return ship(root, announced, branches, worked);
 }
 
 // ---------------------------------------------------------------------------

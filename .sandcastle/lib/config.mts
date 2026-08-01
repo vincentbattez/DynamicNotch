@@ -22,6 +22,8 @@ const configSchema = z.object({
     project: z.string().nullable().default(null),
     /** Only issues carrying this label are eligible for agent work. */
     label: z.string().default("ready-for-agent"),
+    /** Workflow state applied to a feature once its draft PR is open. */
+    startedState: z.string().default("In Progress"),
     /** Workflow state applied once a feature's PR is open. */
     reviewState: z.string().default("In Review"),
   }),

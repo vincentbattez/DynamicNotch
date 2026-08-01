@@ -73,10 +73,36 @@ export async function pushBranch(branch: string): Promise<void> {
   await git("push", "--set-upstream", REMOTE, branch);
 }
 
+/**
+ * Cut the integration branch before any work exists, carrying a single empty
+ * commit — GitHub refuses a pull request whose head is not ahead of its base.
+ * Written with `commit-tree` so the host's working tree is never checked out.
+ *
+ * Based on the *remote* base branch: a stale local `main` would render the
+ * draft pull request as a diff reverting whatever it is missing.
+ */
+export async function createEmptyBranch(
+  branch: string,
+  message: string,
+): Promise<void> {
+  await git("fetch", REMOTE, BASE_BRANCH);
+  const base = `${REMOTE}/${BASE_BRANCH}`;
+  const tree = await git("rev-parse", `${base}^{tree}`);
+  const commit = await git("commit-tree", tree, "-p", base, "-m", message);
+  await git("branch", branch, commit);
+}
+
+/** Best effort — a branch left behind must never mask the error being reported. */
+export async function deleteBranch(branch: string): Promise<void> {
+  await git("push", REMOTE, "--delete", branch).catch(() => {});
+  await git("branch", "-D", branch).catch(() => {});
+}
+
 export async function createPullRequest(options: {
   branch: string;
   title: string;
   body: string;
+  draft?: boolean;
 }): Promise<string> {
   return gh(
     "pr",
@@ -91,7 +117,30 @@ export async function createPullRequest(options: {
     options.title,
     "--body",
     options.body,
+    ...(options.draft ? ["--draft"] : []),
   );
+}
+
+export async function updatePullRequest(
+  url: string,
+  options: { title?: string; body?: string },
+): Promise<void> {
+  const args = ["pr", "edit", url, "--repo", REPO];
+  if (options.title) args.push("--title", options.title);
+  if (options.body) args.push("--body", options.body);
+  await gh(...args);
+}
+
+/** Takes the draft out of draft — the feature is assembled and reviewable. */
+export async function markPullRequestReady(url: string): Promise<void> {
+  await gh("pr", "ready", url, "--repo", REPO);
+}
+
+export async function closePullRequest(
+  url: string,
+  comment: string,
+): Promise<void> {
+  await gh("pr", "close", url, "--repo", REPO, "--comment", comment);
 }
 
 interface OpenPr {
