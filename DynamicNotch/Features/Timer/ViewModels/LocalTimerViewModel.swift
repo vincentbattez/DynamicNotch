@@ -26,7 +26,10 @@ class LocalTimerViewModel: ObservableObject {
 
     /// Starts the timer from an **absolute** end instant (a Command drop carries `endsAt`, not a
     /// duration — ADR-0002). Caller is responsible for the expiry check; a non-future `endsAt`
-    /// yields a zero duration and no-ops via the `duration > 0` guard.
+    /// yields a zero duration and no-ops via the `duration > 0` guard. The instant is reduced to
+    /// a duration here (sub-millisecond drift between the two `Date()` reads) — harmless because
+    /// the countdown displays a duration, and the absolute instant already survived every hop up
+    /// to this last one.
     func start(endsAt: Date, label: String? = nil) {
         start(duration: endsAt.timeIntervalSinceNow, label: label)
     }

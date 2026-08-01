@@ -88,8 +88,10 @@ final class AppContainer {
     lazy var commandRouter = CommandRouter(
         localTimerViewModel: localTimerViewModel,
         isClockTimerActive: { [weak self] in
-            guard let snapshot = self?.timerViewModel.snapshot else { return false }
-            return snapshot.isPaused == false
+            // ANY Clock timer owns the surface — running *or paused*. User story #17: a script
+            // must never displace a countdown the user set themselves in Horloge, even a paused
+            // one. (This is stricter than the live-activity display guard, which ignores paused.)
+            self?.timerViewModel.snapshot != nil
         },
         emitNotification: { [weak self] payload in
             self?.notificationCenterViewModel.add(payload: payload)
