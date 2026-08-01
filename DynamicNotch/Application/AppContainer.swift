@@ -9,6 +9,14 @@ final class AppContainer {
         NotificationInbox.resolvedURL
     }
 
+    /// Where scripts drop Command JSON — a sibling of the inbox (ADR-0002). Resolved in
+    /// `DynamicNotchContract` so the app and CLI agree; honors `$DYNAMICNOTCH_COMMANDS`.
+    static var commandsDirectory: URL {
+        CommandFolder.resolvedURL
+    }
+
+    private let isRunningUITests: Bool
+
     let powerService = PowerService()
     let bluetoothViewModel = BluetoothViewModel()
     let focusViewModel = FocusViewModel()
@@ -75,6 +83,31 @@ final class AppContainer {
         calendarViewModel: calendarViewModel
     )
 
+    /// Carries the timer conflict/replacement policy. Its collaborators are passed as closures
+    /// so the routing is testable without the container (Test 3). See `CommandRouter`.
+    lazy var commandRouter = CommandRouter(
+        localTimerViewModel: localTimerViewModel,
+        isClockTimerActive: { [weak self] in
+            guard let snapshot = self?.timerViewModel.snapshot else { return false }
+            return snapshot.isPaused == false
+        },
+        emitNotification: { [weak self] payload in
+            self?.notificationCenterViewModel.add(payload: payload)
+        }
+    )
+
+    /// Watches `commands/` and routes each ingested Command. Inert under UI tests.
+    lazy var commandMonitor: any CommandMonitoring = {
+        let monitor: any CommandMonitoring = isRunningUITests
+            ? InactiveCommandMonitor()
+            : CommandMonitor(commandsDirectory: AppContainer.commandsDirectory)
+        monitor.onCommand = { [weak self] command in
+            // `onCommand` fires on the monitor's queue; hop to main for the @MainActor router.
+            DispatchQueue.main.async { self?.commandRouter.route(command) }
+        }
+        return monitor
+    }()
+
     lazy var lockScreenPanelManager = LockScreenPanelManager(
         nowPlayingViewModel: nowPlayingViewModel,
         lockScreenManager: lockScreenManager,
@@ -88,6 +121,7 @@ final class AppContainer {
     )
 
     init(isRunningUITests: Bool = ProcessInfo.processInfo.arguments.contains("-ui-testing")) {
+        self.isRunningUITests = isRunningUITests
         self.settingsViewModel = SettingsViewModel()
         self.wifiViewModel = WifiViewModel(settings: settingsViewModel.connectivity)
         self.vpnViewModel = VpnViewModel(settings: settingsViewModel.connectivity)

@@ -10,16 +10,33 @@ enum LocalTimerState {
 class LocalTimerViewModel: ObservableObject {
     @Published var state: LocalTimerState = .stopped
     @Published var remainingTime: TimeInterval = 0
-    
+    /// Optional descriptive name shown under the countdown. Purely presentational: it coalesces
+    /// nothing and has no default; a timer without a Label renders exactly as before it existed.
+    @Published var label: String?
+
     var totalTime: TimeInterval = 0
     var endDate: Date?
     var pausedRemaining: TimeInterval?
-    
+
     private var timer: AnyCancellable?
-    
-    func start(hours: Int, minutes: Int, seconds: Int) {
-        totalTime = TimeInterval(hours * 3600 + minutes * 60 + seconds)
+
+    func start(hours: Int, minutes: Int, seconds: Int, label: String? = nil) {
+        start(duration: TimeInterval(hours * 3600 + minutes * 60 + seconds), label: label)
+    }
+
+    /// Starts the timer from an **absolute** end instant (a Command drop carries `endsAt`, not a
+    /// duration — ADR-0002). Caller is responsible for the expiry check; a non-future `endsAt`
+    /// yields a zero duration and no-ops via the `duration > 0` guard.
+    func start(endsAt: Date, label: String? = nil) {
+        start(duration: endsAt.timeIntervalSinceNow, label: label)
+    }
+
+    func start(duration: TimeInterval, label: String? = nil) {
+        totalTime = duration
         guard totalTime > 0 else { return }
+        self.label = label.flatMap {
+            $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : $0
+        }
         remainingTime = totalTime
         pausedRemaining = nil
         endDate = Date().addingTimeInterval(totalTime)
@@ -62,6 +79,7 @@ class LocalTimerViewModel: ObservableObject {
         remainingTime = 0
         endDate = nil
         pausedRemaining = nil
+        label = nil
     }
     
     func remainingTime(at date: Date) -> TimeInterval {
