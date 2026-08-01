@@ -41,7 +41,10 @@ struct TimerNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
     }
 
     func size(baseWidth: CGFloat, baseHeight: CGFloat) -> CGSize {
-        .init(width: baseWidth + minimalTimerSize, height: baseHeight)
+        // The minimal pill grows in height only for a labelled Local timer on the physical
+        // notch, so the name has a strip below the encoche. No Label ⇒ exactly today's size.
+        let labelHeight: CGFloat = source.label == nil ? 0 : 18
+        return .init(width: baseWidth + minimalTimerSize, height: baseHeight + labelHeight)
     }
 
     func expandedSize(baseWidth: CGFloat, baseHeight: CGFloat) -> CGSize {

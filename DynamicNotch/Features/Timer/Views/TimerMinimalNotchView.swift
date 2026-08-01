@@ -31,16 +31,36 @@ private struct TimerMinimalNotchViewInternal<VM: ObservableObject>: View {
     @Environment(\.isDynamicIsland) private var isDynamicIsland
     @ObservedObject var viewModel: VM
 
+    /// A Label strip is shown only on the physical notch: on Dynamic Island a title would be
+    /// truncated to three letters, so the minimal pill stays compact there (spec #13).
+    private var showsLabel: Bool {
+        !isDynamicIsland && source.label != nil
+    }
+
     var body: some View {
-        HStack {
-            TimerCompactIndicatorView(source: source)
-            
-            Spacer()
-            
-            TimerCountdownText(source: source)
+        VStack(spacing: 0) {
+            HStack {
+                TimerCompactIndicatorView(source: source)
+
+                Spacer()
+
+                TimerCountdownText(source: source)
+            }
+            .padding(.vertical, 10)
+            .padding(.leading, isDynamicIsland ? 4.scaled(by: scale) : 14.scaled(by: scale))
+            .padding(.trailing, isDynamicIsland ? 6.scaled(by: scale) : 14.scaled(by: scale))
+
+            if showsLabel, let label = source.label {
+                // Centred across the full width, under the encoche — the only free zone.
+                Text(label)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.white.opacity(0.7))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, 12)
+                    .padding(.bottom, 6)
+            }
         }
-        .padding(.vertical, 10)
-        .padding(.leading, isDynamicIsland ? 4.scaled(by: scale) : 14.scaled(by: scale))
-        .padding(.trailing, isDynamicIsland ? 6.scaled(by: scale) : 14.scaled(by: scale))
     }
 }
