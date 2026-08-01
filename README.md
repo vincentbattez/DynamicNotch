@@ -121,10 +121,15 @@ the CLI.
 
 ### Installing the CLI
 
-Open **Settings → Notifications**, find the **Command-line tool** card, and click **Install CLI
-tool**. This puts `dynamicnotch` on your `PATH` (`/usr/local/bin/dynamicnotch`). On Apple Silicon
-`/usr/local/bin` is often not writable, so macOS may ask once for your administrator password. The
-install is idempotent — click it again anytime to repair the link.
+DynamicNotch tries to install the CLI for you silently at every launch, so `dynamicnotch` is usually
+already on your `PATH` (`/usr/local/bin/dynamicnotch`) without any action — and a moved or updated app
+repairs its own link on the next launch. This silent attempt never asks for a password: if
+`/usr/local/bin` isn't writable it does nothing.
+
+To install it yourself, open **Settings → General → System** and use the **Command-line tool** row.
+The button reads **Install**, **Installed** (once it's set up), or **Repair** if the link points at an
+old bundle. On Apple Silicon `/usr/local/bin` is often not writable, so macOS may ask once for your
+administrator password. The install is idempotent — trigger it again anytime to repair the link.
 
 ### Using the CLI
 
