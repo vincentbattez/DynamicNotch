@@ -52,6 +52,17 @@
   <img src="assets/readme/LockScreen.png" alt="DynamicNotch preview" width="100%" />
 </p>
 
+> ### 🍴 Fork additions (vs [jackson-storm/DynamicNotch](https://github.com/jackson-storm/DynamicNotch))
+
+- **[Script Notifications](#-script-notifications)** — any local script can push a notification to the notch (badge + banner, severity levels).
+<div align="center"><img src="assets/readme/Notification-big.png" alt="Notification big" width="50%" /><img src="assets/readme/Notification-small.png" alt="Notification small" width="50%" /></div>
+
+- **[`dynamicnotch` CLI](#-command-line-tool)** — `notify` and `timer start`, auto-installed on `PATH`.
+<div align="center"><img src="assets/readme/CLI.png" alt="CLI" width="50%" /></div>
+
+- **Local timer label** — a name shown under the countdown, set from the setup panel or the CLI.
+<div align="center"><img src="assets/readme/Timer-title.png" alt="No Internet" width="50%" /></div>
+
 ## 🧐 Why DynamicNotch
 
 The app is built with SwiftUI and AppKit, so the notch window, settings UI, and event handling feel
@@ -113,11 +124,20 @@ highest-severity unread notification) plus a transient arrival banner for about 
 Notifications are coalesced by `source` — a new notification from the same source replaces the
 existing entry instead of adding a duplicate — and they persist across app restarts.
 
-The recommended way to send a notification is the **`dynamicnotch` command-line tool**. It builds a
-valid payload and delivers it atomically for you, so scripts never hand-roll JSON escaping or the
-temp-file dance. Under the hood it drops a file into a watched inbox folder — the same raw file-drop
-contract remains available as a [low-level fallback](#low-level-file-drop) for environments without
-the CLI.
+Open **Settings → Notifications** and flip the single **Notifications** toggle to activate both the
+ambient badge and the Notifications page in the carousel. The badge's display priority is adjustable
+under **Settings → Priorities**.
+
+Notifications are sent with [`dynamicnotch notify`](#dynamicnotch-notify) — see the command-line
+tool below.
+
+## 🐚 Command-line tool
+
+The **`dynamicnotch`** CLI drives the notch from any script: it pushes notifications
+([`notify`](#dynamicnotch-notify)) and starts the Local timer
+([`timer start`](#dynamicnotch-timer-start)). Every command builds a valid payload and delivers it
+atomically, so scripts never hand-roll JSON escaping or the temp-file dance. Commands never block on
+the app: the CLI drops a file into a watched folder and exits.
 
 ### Installing the CLI
 
@@ -131,7 +151,18 @@ The button reads **Install**, **Installed** (once it's set up), or **Repair** if
 old bundle. On Apple Silicon `/usr/local/bin` is often not writable, so macOS may ask once for your
 administrator password. The install is idempotent — trigger it again anytime to repair the link.
 
-### Using the CLI
+> Keep the notch from ever failing a script: guard the call so a missing binary can't trip
+> `set -euo pipefail`.
+>
+> ```sh
+> if [ -x "$(command -v dynamicnotch)" ]; then
+>   dynamicnotch notify --title "Build" --summary "OK" --level success || true
+> fi
+> ```
+
+### `dynamicnotch notify`
+
+Push a [Script Notification](#-script-notifications) to the notch.
 
 ```bash
 dynamicnotch notify --title "Backup nightly" \
@@ -154,10 +185,10 @@ The CLI exits `0` once the notification has been handed off, or non-zero on inva
 missing `--title`/`--summary`, an unknown `--level`) or a write failure. It works even when the app
 is closed — the notification is drained on the next launch.
 
-### Low-level file-drop
+#### Low-level file-drop
 
 If the CLI is not available, any script can talk to the same inbox folder directly by writing a JSON
-file into it. This is the low-level layer the CLI is built on.
+file into it. This is the low-level layer `notify` is built on.
 
 Create a file with this structure and write it atomically into the inbox folder (see the one-liner
 below):
@@ -194,10 +225,10 @@ tmp=$(mktemp "${INBOX}/.XXXXXX.json") \
 > the app ingests the first can collide and lose a notification. The `dynamicnotch` CLI avoids this
 > by generating a unique filename for every invocation — prefer it under bursty load.
 
-### Starting the Local timer
+### `dynamicnotch timer start`
 
-A **Command** is not a Notification: it *acts* and *perishes* where a Notification *informs* and
-*lasts*. `dynamicnotch timer start` drops a Command into a sibling folder of the inbox
+Start the **Local timer** from a script. A **Command** is not a Notification: it *acts* and
+*perishes* where a Notification *informs* and *lasts*. `timer start` drops a Command into a sibling folder of the inbox
 (`~/Library/Application Support/DynamicNotch/commands/`); the app starts the **Local timer** and
 shows its **Label** under the countdown on the notch.
 
@@ -225,23 +256,8 @@ Rules:
   don't fight over the surface.
 - **The macOS Clock timer wins.** While a Clock (Horloge) timer runs, a `timer start` command starts
   nothing and the app pushes a `warning` Notification instead — you never face a blank notch.
-- The CLI exits `0` once the file is dropped (never blocks on the app), or non-zero on an argument
-  error (both time flags, neither, or a non-positive `--duration`).
-
-> Keep the notch from ever failing a script: guard the call so a missing binary can't trip
-> `set -euo pipefail`.
->
-> ```sh
-> if [ -x "$(command -v dynamicnotch)" ]; then
->   dynamicnotch timer start --until "$END_EPOCH" --label "$TITLE" || true
-> fi
-> ```
-
-### Enabling the feature
-
-Open **Settings → Notifications** and flip the single **Notifications** toggle. This activates
-both the ambient badge and the Notifications page in the carousel. You can also adjust the badge's
-display priority under **Settings → Priorities**.
+- The CLI exits `0` once the file is dropped, or non-zero on an argument error (both time flags,
+  neither, or a non-positive `--duration`).
 
 ## 💻 Gallery
 
