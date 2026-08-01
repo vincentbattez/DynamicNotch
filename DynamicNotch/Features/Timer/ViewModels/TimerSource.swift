@@ -11,6 +11,17 @@ enum TimerSource {
     case system(TimerViewModel)
     case local(LocalTimerViewModel)
 
+    /// The Local timer's descriptive name, or `nil`. The Clock timer never carries a Label —
+    /// the Horloge monitor exposes no name — so `.system` always returns `nil`.
+    var label: String? {
+        switch self {
+        case .system:
+            return nil
+        case .local(let vm):
+            return vm.label
+        }
+    }
+
     var isPaused: Bool {
         switch self {
         case .system(let vm):

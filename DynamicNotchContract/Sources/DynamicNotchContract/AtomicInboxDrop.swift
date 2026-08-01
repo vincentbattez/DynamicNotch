@@ -25,6 +25,21 @@ public enum AtomicInboxDrop {
         return finalURL
     }
 
+    /// Sibling of `write(_:to:)` for Commands: encodes `command` and drops it atomically into
+    /// `commandsDirectory` as `<uuid>.json`. A distinct typed overload rather than a
+    /// generalization — the `notify` path stays untouched (ADR-0002).
+    @discardableResult
+    public static func write(
+        _ command: CommandPayload,
+        to commandsDirectory: URL
+    ) throws -> URL {
+        let data = try JSONEncoder().encode(command)
+        let finalURL = commandsDirectory
+            .appendingPathComponent("\(UUID().uuidString).json", isDirectory: false)
+        try writeAtomically(data, to: finalURL)
+        return finalURL
+    }
+
     /// Places `data` at `finalURL` atomically: writes a `.`-prefixed temp in the *same*
     /// directory, then renames it onto `finalURL`. Creates the parent directory if absent.
     /// The caller chooses the final name — production/CLI pass `<uuid>.json`; tests may pass

@@ -93,7 +93,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
 
             notchEventCoordinator.checkFirstLaunch()
-            
+            container.commandMonitor.startMonitoring()
+
             // Наблюдаем за появлением обновлений ПО для показа Live Activity
             SparkleUpdater.shared.$isUpdateAvailable
                 .receive(on: RunLoop.main)
@@ -122,6 +123,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         screenRecordingViewModel.stopMonitoring()
         hardwareHUDMonitor.stopMonitoring()
         notificationCenterViewModel.stopMonitoring()
+        container.commandMonitor.stopMonitoring()
         if !isRunningUITests {
             lockScreenPanelManager.invalidate()
         }

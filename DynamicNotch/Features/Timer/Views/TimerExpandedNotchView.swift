@@ -85,11 +85,19 @@ private struct TimerExpandedNotchViewInternal<VM: ObservableObject>: View {
         }
     }
     
+    /// The Label replaces the generic word "Timer" when one exists; otherwise the rendering is
+    /// exactly today's. Same font and dimmed orange either way.
+    private var titleText: String {
+        source.label ?? "Timer"
+    }
+
     private var rightContent: some View {
         HStack {
-            Text(verbatim: "Timer")
+            Text(verbatim: titleText)
                 .font(.system(size: 14))
                 .foregroundStyle(Color.orange.opacity(0.8))
+                .lineLimit(1)
+                .truncationMode(.tail)
                 .offset(y: 8)
             
             TimelineView(.animation(minimumInterval: 0.25, paused: source.isPaused)) { context in

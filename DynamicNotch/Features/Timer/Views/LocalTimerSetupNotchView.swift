@@ -14,35 +14,50 @@ struct LocalTimerSetupNotchView: View {
     @State private var hours: String = ""
     @State private var minutes: String = ""
     @State private var seconds: String = ""
-    
+    @State private var label: String = ""
+
     var body: some View {
         VStack {
             Spacer()
             VStack(spacing: 12) {
                 setupView
+                labelField
                 button
             }
         }
         .padding(.horizontal, isDynamicIsland ? 2 : 4)
     }
-    
+
     @ViewBuilder
     private var setupView: some View {
         HStack(spacing: 15) {
             timeInputField(title: "HR", value: $hours, maxVal: 23)
-            
+
             Text(":")
                 .font(.system(size: 32, weight: .semibold, design: .rounded)).foregroundColor(.gray)
                 .padding(.top, 10)
-            
+
             timeInputField(title: "MIN", value: $minutes, maxVal: 59)
-            
+
             Text(":")
                 .font(.system(size: 32, weight: .semibold, design: .rounded)).foregroundColor(.gray)
                 .padding(.top, 10)
-            
+
             timeInputField(title: "SEC", value: $seconds, maxVal: 59)
         }
+    }
+
+    // Optional Label, so naming a timer isn't a CLI-only privilege (spec #14). Placeholder is
+    // localized ("Timer name") like the rest of the settings.
+    @ViewBuilder
+    private var labelField: some View {
+        TextField("Timer name", text: $label)
+            .textFieldStyle(PlainTextFieldStyle())
+            .font(.system(size: 13))
+            .foregroundStyle(.white)
+            .multilineTextAlignment(.center)
+            .lineLimit(1)
+            .padding(.horizontal, 12)
     }
     
     @ViewBuilder
@@ -52,6 +67,7 @@ struct LocalTimerSetupNotchView: View {
                 hours = ""
                 minutes = ""
                 seconds = ""
+                label = ""
             } label: {
                 Text(verbatim: "Reset")
                     .fontWeight(.medium)
@@ -63,7 +79,7 @@ struct LocalTimerSetupNotchView: View {
                 let h = Int(hours) ?? 0
                 let m = Int(minutes) ?? 0
                 let s = Int(seconds) ?? 0
-                localTimerViewModel.start(hours: h, minutes: m, seconds: s)
+                localTimerViewModel.start(hours: h, minutes: m, seconds: s, label: label)
             } label: {
                 Image(systemName: "play.fill")
                     .font(.system(size: 20))

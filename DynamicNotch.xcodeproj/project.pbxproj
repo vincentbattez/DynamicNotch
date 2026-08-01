@@ -8,10 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		E2761738300A66E900E79207 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = E2761737300A66E900E79207 /* Sparkle */; };
-		AAAA000000000000000000A4 /* NotificationContract in Frameworks */ = {isa = PBXBuildFile; productRef = AAAA000000000000000000A2 /* NotificationContract */; };
-		AAAA000000000000000000A5 /* NotificationContract in Frameworks */ = {isa = PBXBuildFile; productRef = AAAA000000000000000000A3 /* NotificationContract */; };
+		AAAA000000000000000000A4 /* DynamicNotchContract in Frameworks */ = {isa = PBXBuildFile; productRef = AAAA000000000000000000A2 /* DynamicNotchContract */; };
+		AAAA000000000000000000A5 /* DynamicNotchContract in Frameworks */ = {isa = PBXBuildFile; productRef = AAAA000000000000000000A3 /* DynamicNotchContract */; };
 		CADE00000000000000000015 /* ArgumentParser in Frameworks */ = {isa = PBXBuildFile; productRef = CADE000000000000000000A2 /* ArgumentParser */; };
-		CADE00000000000000000016 /* NotificationContract in Frameworks */ = {isa = PBXBuildFile; productRef = CADE000000000000000000A3 /* NotificationContract */; };
+		CADE00000000000000000016 /* DynamicNotchContract in Frameworks */ = {isa = PBXBuildFile; productRef = CADE000000000000000000A3 /* DynamicNotchContract */; };
 		CAFE00000000000000000001 /* dynamicnotch in Embed CLI Tool */ = {isa = PBXBuildFile; fileRef = CADE00000000000000000011 /* dynamicnotch */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		E2A100022F90000000000001 /* DynamicNotch/Resources/MediaRemoteAdapter/MediaRemoteAdapter.framework in Embed MediaRemote Adapter */ = {isa = PBXBuildFile; fileRef = E2A100012F90000000000001 /* DynamicNotch/Resources/MediaRemoteAdapter/MediaRemoteAdapter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E2C135B72F59FA8100348421 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = E2C135B62F59FA8100348421 /* Lottie */; };
@@ -153,7 +153,7 @@
 			files = (
 				E2761738300A66E900E79207 /* Sparkle in Frameworks */,
 				E2C135B72F59FA8100348421 /* Lottie in Frameworks */,
-				AAAA000000000000000000A4 /* NotificationContract in Frameworks */,
+				AAAA000000000000000000A4 /* DynamicNotchContract in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -161,7 +161,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AAAA000000000000000000A5 /* NotificationContract in Frameworks */,
+				AAAA000000000000000000A5 /* DynamicNotchContract in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -177,7 +177,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CADE00000000000000000015 /* ArgumentParser in Frameworks */,
-				CADE00000000000000000016 /* NotificationContract in Frameworks */,
+				CADE00000000000000000016 /* DynamicNotchContract in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -241,7 +241,7 @@
 			packageProductDependencies = (
 				E2C135B62F59FA8100348421 /* Lottie */,
 				E2761737300A66E900E79207 /* Sparkle */,
-				AAAA000000000000000000A2 /* NotificationContract */,
+				AAAA000000000000000000A2 /* DynamicNotchContract */,
 			);
 			productName = DynamicNotch;
 			productReference = E2EF78512EDDB60E00F96D1E /* DynamicNotch.app */;
@@ -266,7 +266,7 @@
 			);
 			name = DynamicNotchTests;
 			packageProductDependencies = (
-				AAAA000000000000000000A3 /* NotificationContract */,
+				AAAA000000000000000000A3 /* DynamicNotchContract */,
 			);
 			productName = DynamicNotchTests;
 			productReference = F10000000000000000000001 /* DynamicNotchTests.xctest */;
@@ -312,7 +312,7 @@
 			name = DynamicNotchCLI;
 			packageProductDependencies = (
 				CADE000000000000000000A2 /* ArgumentParser */,
-				CADE000000000000000000A3 /* NotificationContract */,
+				CADE000000000000000000A3 /* DynamicNotchContract */,
 			);
 			productName = DynamicNotchCLI;
 			productReference = CADE00000000000000000011 /* dynamicnotch */;
@@ -356,7 +356,7 @@
 			packageReferences = (
 				E2C135B52F59FA8100348421 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 				E2761736300A66E900E79207 /* XCRemoteSwiftPackageReference "Sparkle" */,
-				AAAA000000000000000000A1 /* XCLocalSwiftPackageReference "NotificationContract" */,
+				AAAA000000000000000000A1 /* XCLocalSwiftPackageReference "DynamicNotchContract" */,
 				CADE000000000000000000A1 /* XCRemoteSwiftPackageReference "swift-argument-parser" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -910,9 +910,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		AAAA000000000000000000A1 /* XCLocalSwiftPackageReference "NotificationContract" */ = {
+		AAAA000000000000000000A1 /* XCLocalSwiftPackageReference "DynamicNotchContract" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = NotificationContract;
+			relativePath = DynamicNotchContract;
 		};
 /* End XCLocalSwiftPackageReference section */
 
@@ -944,15 +944,15 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		AAAA000000000000000000A2 /* NotificationContract */ = {
+		AAAA000000000000000000A2 /* DynamicNotchContract */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = AAAA000000000000000000A1 /* XCLocalSwiftPackageReference "NotificationContract" */;
-			productName = NotificationContract;
+			package = AAAA000000000000000000A1 /* XCLocalSwiftPackageReference "DynamicNotchContract" */;
+			productName = DynamicNotchContract;
 		};
-		AAAA000000000000000000A3 /* NotificationContract */ = {
+		AAAA000000000000000000A3 /* DynamicNotchContract */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = AAAA000000000000000000A1 /* XCLocalSwiftPackageReference "NotificationContract" */;
-			productName = NotificationContract;
+			package = AAAA000000000000000000A1 /* XCLocalSwiftPackageReference "DynamicNotchContract" */;
+			productName = DynamicNotchContract;
 		};
 		E2761737300A66E900E79207 /* Sparkle */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -969,10 +969,10 @@
 			package = CADE000000000000000000A1 /* XCRemoteSwiftPackageReference "swift-argument-parser" */;
 			productName = ArgumentParser;
 		};
-		CADE000000000000000000A3 /* NotificationContract */ = {
+		CADE000000000000000000A3 /* DynamicNotchContract */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = AAAA000000000000000000A1 /* XCLocalSwiftPackageReference "NotificationContract" */;
-			productName = NotificationContract;
+			package = AAAA000000000000000000A1 /* XCLocalSwiftPackageReference "DynamicNotchContract" */;
+			productName = DynamicNotchContract;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

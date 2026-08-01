@@ -1,35 +1,36 @@
 import Dispatch
-import Foundation
 import DynamicNotchContract
+import Foundation
 import OSLog
 
-/// Watches the inbox directory for `*.json` drops, parses each into a `NotificationPayload`,
-/// hands it off via `onPayload`, then removes the file. Malformed drops are retried once
+/// Watches the `commands/` folder for `*.json` drops, parses each into a `CommandPayload`,
+/// hands it off via `onCommand`, then removes the file. Malformed drops are retried once
 /// (guarding against non-atomic writers) and, if still unparseable, quarantined in
-/// `rejected/`. The inbox directory and the retry delay are injected for testability.
-final class NotificationInboxMonitor: NotificationInboxMonitoring {
-    var onPayload: ((NotificationPayload) -> Void)?
-    var onDrainCompleted: (() -> Void)?
+/// `rejected/`. Decalques `NotificationInboxMonitor`; the folder and retry delay are injected
+/// for testability. Expiry (`endsAt <= now`) is a routing decision, not the monitor's job — it
+/// ingests every well-formed command and lets `CommandRouter` discard stale ones.
+final class CommandMonitor: CommandMonitoring {
+    var onCommand: ((CommandPayload) -> Void)?
 
-    private let inboxDirectory: URL
+    private let commandsDirectory: URL
     private let retryDelay: TimeInterval
     private let fileManager: FileManager
     private let queue = DispatchQueue(
-        label: "com.dynamicnotch.notifications.inbox",
+        label: "com.dynamicnotch.commands.monitor",
         qos: .utility
     )
-    private let logger = Logger(subsystem: "com.dynamicnotch", category: "NotificationInbox")
+    private let logger = Logger(subsystem: "com.dynamicnotch", category: "Commands")
 
     private var directorySource: DispatchSourceFileSystemObject?
     private var isMonitoring = false
     private var processingPaths: Set<String> = []
 
     init(
-        inboxDirectory: URL,
+        commandsDirectory: URL,
         retryDelay: TimeInterval = 0.2,
         fileManager: FileManager = .default
     ) {
-        self.inboxDirectory = inboxDirectory
+        self.commandsDirectory = commandsDirectory
         self.retryDelay = retryDelay
         self.fileManager = fileManager
     }
@@ -44,15 +45,11 @@ final class NotificationInboxMonitor: NotificationInboxMonitoring {
 
         queue.async { [weak self] in
             guard let self else { return }
-            self.ensureInboxExists()
-            // Arm the watcher *before* draining so a drop that lands during startup is either
-            // seen by the drain scan or latched by the (already resumed) source — never missed.
+            self.ensureDirectoryExists()
+            // Arm the watcher *before* scanning so a drop landing during startup is either seen
+            // by the scan or latched by the (already resumed) source — never missed.
             self.installDirectoryWatcher()
-            self.scanInbox()
-            // Signal drain completion on the main thread. Because each payload from scanInbox()
-            // is also dispatched via DispatchQueue.main.async, FIFO ordering on the main queue
-            // guarantees this fires AFTER all drain items have been added to the VM.
-            DispatchQueue.main.async { [weak self] in self?.onDrainCompleted?() }
+            self.scan()
         }
     }
 
@@ -69,14 +66,14 @@ final class NotificationInboxMonitor: NotificationInboxMonitoring {
     }
 }
 
-private extension NotificationInboxMonitor {
+private extension CommandMonitor {
     var rejectedDirectory: URL {
-        inboxDirectory.appendingPathComponent("rejected", isDirectory: true)
+        commandsDirectory.appendingPathComponent("rejected", isDirectory: true)
     }
 
-    func ensureInboxExists() {
+    func ensureDirectoryExists() {
         try? fileManager.createDirectory(
-            at: inboxDirectory,
+            at: commandsDirectory,
             withIntermediateDirectories: true
         )
     }
@@ -84,9 +81,9 @@ private extension NotificationInboxMonitor {
     func installDirectoryWatcher() {
         guard directorySource == nil else { return }
 
-        let descriptor = open(inboxDirectory.path, O_EVTONLY)
+        let descriptor = open(commandsDirectory.path, O_EVTONLY)
         guard descriptor != -1 else {
-            logger.debug("Inbox directory is not available for watching")
+            logger.debug("Commands directory is not available for watching")
             return
         }
 
@@ -96,7 +93,7 @@ private extension NotificationInboxMonitor {
             queue: queue
         )
         source.setEventHandler { [weak self] in
-            self?.scanInbox()
+            self?.scan()
         }
         source.setCancelHandler {
             close(descriptor)
@@ -106,9 +103,9 @@ private extension NotificationInboxMonitor {
         source.resume()
     }
 
-    func scanInbox() {
+    func scan() {
         guard let urls = try? fileManager.contentsOfDirectory(
-            at: inboxDirectory,
+            at: commandsDirectory,
             includingPropertiesForKeys: nil,
             options: [.skipsHiddenFiles]
         ) else {
@@ -128,16 +125,16 @@ private extension NotificationInboxMonitor {
         let path = url.standardizedFileURL.path
         guard processingPaths.insert(path).inserted else { return }
 
-        if let payload = parsePayload(at: url) {
-            ingest(payload, from: url)
+        if let command = parseCommand(at: url) {
+            ingest(command, from: url)
             processingPaths.remove(path)
         } else {
             // Retry once after a short delay: a non-atomic writer may still be mid-write.
             queue.asyncAfter(deadline: .now() + retryDelay) { [weak self] in
                 guard let self else { return }
 
-                if let payload = self.parsePayload(at: url) {
-                    self.ingest(payload, from: url)
+                if let command = self.parseCommand(at: url) {
+                    self.ingest(command, from: url)
                 } else {
                     self.reject(url)
                 }
@@ -146,18 +143,13 @@ private extension NotificationInboxMonitor {
         }
     }
 
-    func parsePayload(at url: URL) -> NotificationPayload? {
+    func parseCommand(at url: URL) -> CommandPayload? {
         guard let data = try? Data(contentsOf: url) else { return nil }
-        return try? JSONDecoder().decode(NotificationPayload.self, from: data)
+        return try? JSONDecoder().decode(CommandPayload.self, from: data)
     }
 
-    func ingest(_ payload: NotificationPayload, from url: URL) {
-        // Push to the VM, then remove the file (spec order). NOTE: this is not yet
-        // at-least-once — `onPayload` hops to the main actor and persists asynchronously,
-        // so a crash before that persist still loses the drop even though we delete last.
-        // Deleting only after persistence is confirmed is a deliberate follow-up (see
-        // PRD §34), out of scope for this slice.
-        onPayload?(payload)
+    func ingest(_ command: CommandPayload, from url: URL) {
+        onCommand?(command)
         try? fileManager.removeItem(at: url)
     }
 
@@ -176,7 +168,7 @@ private extension NotificationInboxMonitor {
 
         do {
             try fileManager.moveItem(at: url, to: destination)
-            logger.error("Quarantined malformed inbox file: \(url.lastPathComponent, privacy: .public)")
+            logger.error("Quarantined malformed command file: \(url.lastPathComponent, privacy: .public)")
         } catch {
             // If the move fails (e.g. the file vanished), drop it rather than crash.
             try? fileManager.removeItem(at: url)

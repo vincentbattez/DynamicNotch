@@ -1,6 +1,6 @@
 import Combine
 import Foundation
-import NotificationContract
+import DynamicNotchContract
 
 /// Single source of truth for the Notifications feature: owns the list, the read/unread
 /// state, the unread count and the highest unread severity. The inbox monitor feeds it
