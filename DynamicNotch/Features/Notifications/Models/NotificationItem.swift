@@ -1,9 +1,9 @@
 internal import AppKit
-import NotificationContract
+import DynamicNotchContract
 import SwiftUI
 
 // `NotificationLevel` and `NotificationPayload` are the wire contract, now owned by the
-// `NotificationContract` module (shared with the `dynamicnotch` CLI). Only the
+// `DynamicNotchContract` module (shared with the `dynamicnotch` CLI). Only the
 // *presentation* of a level — its tint and default SF Symbol — stays app-side, as an
 // extension on the imported enum, so the module keeps zero UI dependencies.
 extension NotificationLevel {

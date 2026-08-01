@@ -1,6 +1,6 @@
 import Dispatch
 import Foundation
-import NotificationContract
+import DynamicNotchContract
 import OSLog
 
 /// Watches the inbox directory for `*.json` drops, parses each into a `NotificationPayload`,

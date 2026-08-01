@@ -1,5 +1,5 @@
 import Foundation
-import NotificationContract
+import DynamicNotchContract
 
 /// The testable heart of `dynamicnotch notify`: given an already-resolved inbox directory
 /// and the pieces of a payload, it builds a `NotificationPayload` and drops it atomically.

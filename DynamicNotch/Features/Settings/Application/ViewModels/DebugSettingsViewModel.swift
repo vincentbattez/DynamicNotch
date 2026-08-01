@@ -8,7 +8,7 @@
 #if DEBUG
 import SwiftUI
 import Combine
-import NotificationContract
+import DynamicNotchContract
 
 @MainActor
 final class DebugSettingsViewModel: ObservableObject {

@@ -1,5 +1,5 @@
 import Foundation
-import NotificationContract
+import DynamicNotchContract
 
 /// Abstraction over the inbox watcher so the view model can be exercised with a fake.
 /// Mirrors `DownloadMonitoring`, but pushes one payload per ingested file rather than a

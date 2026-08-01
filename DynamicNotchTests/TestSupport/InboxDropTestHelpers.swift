@@ -1,5 +1,5 @@
 import Foundation
-import NotificationContract
+import DynamicNotchContract
 
 // Shared filesystem helpers for inbox-monitor tests: make a throwaway inbox, drop files
 // atomically, and count what is left behind. The atomic write itself delegates to

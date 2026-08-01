@@ -1,5 +1,5 @@
 import CoreAudio
-import NotificationContract
+import DynamicNotchContract
 import SwiftUI
 @testable import DynamicNotch
 

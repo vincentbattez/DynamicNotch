@@ -1,7 +1,7 @@
 #if DEBUG
 internal import AppKit
 import Foundation
-import NotificationContract
+import DynamicNotchContract
 
 /// Debug-only helper that drives the notifications feature through its *real* pipeline by
 /// writing files into the app's watched inbox. The running app owns the live

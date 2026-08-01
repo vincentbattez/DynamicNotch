@@ -1,9 +1,9 @@
 import Foundation
-import NotificationContract
+import DynamicNotchContract
 
 @MainActor
 final class AppContainer {
-    /// Where scripts drop notification JSON. Derived once in `NotificationContract` so the
+    /// Where scripts drop notification JSON. Derived once in `DynamicNotchContract` so the
     /// app and the `dynamicnotch` CLI can never disagree; honors `$DYNAMICNOTCH_INBOX`.
     static var notificationsInboxDirectory: URL {
         NotificationInbox.resolvedURL

@@ -1,6 +1,6 @@
 import ArgumentParser
 import Foundation
-import NotificationContract
+import DynamicNotchContract
 
 /// `dynamicnotch` — a thin CLI over the inbox file-drop contract. It builds a valid
 /// `NotificationPayload` and drops it atomically, so scripts never hand-roll JSON escaping

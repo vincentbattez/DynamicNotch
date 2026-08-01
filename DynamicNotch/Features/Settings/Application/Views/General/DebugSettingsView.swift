@@ -1,7 +1,7 @@
 #if DEBUG
 import SwiftUI
 import Combine
-import NotificationContract
+import DynamicNotchContract
 
 struct DebugSettingsView: View {
     @ObservedObject var viewModel: DebugSettingsViewModel

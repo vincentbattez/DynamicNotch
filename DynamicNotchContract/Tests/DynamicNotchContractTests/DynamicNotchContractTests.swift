@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import NotificationContract
+@testable import DynamicNotchContract
 
 // Seam 1 — pure logic of the shared contract, no Xcode, no signing.
 
