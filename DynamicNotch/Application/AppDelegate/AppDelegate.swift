@@ -85,6 +85,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         if !isRunningUITests {
+            // Silent best-effort: create/repair the /usr/local/bin/dynamicnotch symlink off the
+            // main thread so the notch is available immediately. Never escalates, never prompts,
+            // never touches a foreign file — and self-guards against test hosts.
+            Task.detached(priority: .background) {
+                CLIToolInstaller.installAutomaticallyIfPossible()
+            }
+
             notchEventCoordinator.checkFirstLaunch()
             
             // Наблюдаем за появлением обновлений ПО для показа Live Activity
