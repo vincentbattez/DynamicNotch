@@ -2,16 +2,58 @@ import ArgumentParser
 import Foundation
 import DynamicNotchContract
 
-/// `dynamicnotch` — a thin CLI over the inbox file-drop contract. It builds a valid
-/// `NotificationPayload` and drops it atomically, so scripts never hand-roll JSON escaping
-/// or the temp-file `rename` dance.
+/// `dynamicnotch` — a thin CLI over the DynamicNotch file-drop contracts. It builds valid
+/// payloads and drops them atomically, so scripts never hand-roll JSON escaping or the
+/// temp-file `rename` dance.
 @main
 struct DynamicNotchCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "dynamicnotch",
-        abstract: "Push a notification into DynamicNotch from any process.",
-        subcommands: [Notify.self]
+        abstract: "Drive DynamicNotch from any process.",
+        subcommands: [Notify.self, Timer.self]
     )
+}
+
+/// `dynamicnotch timer …` — Command drops that pilot the Local timer. `start` today; `stop` /
+/// `pause` can join later without breaking the contract.
+struct Timer: ParsableCommand {
+    static let configuration = CommandConfiguration(
+        abstract: "Control the DynamicNotch Local timer.",
+        subcommands: [Start.self]
+    )
+
+    struct Start: ParsableCommand {
+        static let configuration = CommandConfiguration(
+            abstract: "Start (or replace) the Local timer via a command drop."
+        )
+
+        @Option(name: .long, help: "Absolute end instant: epoch seconds or ISO8601. XOR --duration.")
+        var until: String?
+
+        @Option(name: .long, help: "Whole seconds from now until the timer ends. XOR --until.")
+        var duration: Int?
+
+        @Option(name: .long, help: "Optional name shown under the countdown on the notch.")
+        var label: String?
+
+        func run() throws {
+            do {
+                let endsAt = try TimerStartCore.resolveEndsAt(
+                    until: until,
+                    duration: duration,
+                    now: Date()
+                )
+                try TimerStartCore.run(
+                    endsAt: endsAt,
+                    label: label,
+                    commands: CommandFolder.resolvedURL
+                )
+            } catch let error as TimerStartCore.UsageError {
+                // Surface flag misuse as an ArgumentParser usage error (exit ≠ 0).
+                throw ValidationError(error.description)
+            }
+        }
+    }
 }
 
 /// Strict `--level` parsing: an unknown value yields `nil`, which argument-parser turns into
