@@ -24,6 +24,7 @@ final class NotchEventCoordinator: ObservableObject {
     private let notificationCenterViewModel: NotificationCenterViewModel
     private let homePageViewModel: HomePageViewModel
     private let calendarViewModel: CalendarViewModel
+    private let screenshotViewModel: ScreenshotViewModel
     private let lockScreenManager: LockScreenManager
     private let systemHandler: NotchSystemEventsHandler
     private let focusHandler: NotchFocusEventsHandler
@@ -76,7 +77,8 @@ final class NotchEventCoordinator: ObservableObject {
         homePageViewModel: HomePageViewModel,
         localTimerViewModel: LocalTimerViewModel,
         notificationCenterViewModel: NotificationCenterViewModel,
-        calendarViewModel: CalendarViewModel
+        calendarViewModel: CalendarViewModel,
+        screenshotViewModel: ScreenshotViewModel? = nil
     ) {
         self.notchViewModel = notchViewModel
         self.wifiViewModel = wifiViewModel
@@ -92,6 +94,7 @@ final class NotchEventCoordinator: ObservableObject {
         self.notificationCenterViewModel = notificationCenterViewModel
         self.homePageViewModel = homePageViewModel
         self.calendarViewModel = calendarViewModel
+        self.screenshotViewModel = screenshotViewModel ?? ScreenshotViewModel()
         self.lockScreenManager = lockScreenManager
         self.systemHandler = NotchSystemEventsHandler(
             notchViewModel: notchViewModel,
@@ -231,6 +234,32 @@ final class NotchEventCoordinator: ObservableObject {
         // content types read `isDetailPresented`); relayout the notch so it takes effect.
         self.notificationCenterViewModel.onDetailPresentationChange = { [weak notchViewModel] in
             notchViewModel?.refreshActiveLiveActivityGeometry()
+        }
+
+        self.screenshotViewModel.onScreenshotReady = { [weak self] screenshot in
+            guard let self else { return }
+            guard self.settingsViewModel.screenRecording.isScreenshotActivityEnabled else { return }
+            
+            ScreenshotFlyAnimationService.shared.playFlyToNotchAnimation(image: screenshot.image) { [weak self] in
+                guard let self else { return }
+                let content = ScreenshotNotchContent(viewModel: self.screenshotViewModel)
+                if self.settingsViewModel.screenRecording.isScreenshotAutoHideEnabled {
+                    let duration = TimeInterval(self.settingsViewModel.screenRecording.screenshotTemporaryActivityDuration)
+                    self.notchViewModel.send(.showTemporaryNotification(content, duration: duration))
+                } else {
+                    self.notchViewModel.send(.showLiveActivity(content))
+                }
+            }
+        }
+        self.screenshotViewModel.onScreenshotDismissed = { [weak self] in
+            guard let self else { return }
+            self.notchViewModel.send(.hideLiveActivity(id: NotchContentRegistry.Screenshot.active.id))
+            self.notchViewModel.hideTemporaryNotification()
+        }
+        if settingsViewModel.screenRecording.isScreenshotActivityEnabled {
+            self.screenshotViewModel.startMonitoring(disableSystemThumbnail: true)
+        } else {
+            ScreenshotMonitorService.setSystemFloatingThumbnailEnabled(true)
         }
 
         observeCalendarEvents()
@@ -739,6 +768,19 @@ final class NotchEventCoordinator: ObservableObject {
                     self.notchViewModel.send(
                         .hideLiveActivity(id: NotchContentRegistry.ScreenRecording.active.id)
                     )
+                }
+            }
+            .store(in: &cancellables)
+
+        settingsViewModel.screenRecording.$isScreenshotActivityEnabled
+            .removeDuplicates()
+            .sink { [weak self] isEnabled in
+                guard let self else { return }
+                if isEnabled {
+                    self.screenshotViewModel.startMonitoring(disableSystemThumbnail: true)
+                } else {
+                    self.screenshotViewModel.stopMonitoring()
+                    ScreenshotMonitorService.setSystemFloatingThumbnailEnabled(true)
                 }
             }
             .store(in: &cancellables)

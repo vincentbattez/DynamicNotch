@@ -460,7 +460,7 @@ struct SettingsRootView: View {
 
         case .screenRecording:
             detailContainer(for: section) {
-                ScreenRecordingSettingsView(
+                ScreenCaptureSettingsView(
                     settings: settingsViewModel.screenRecording,
                     appearanceSettings: settingsViewModel.application
                 )

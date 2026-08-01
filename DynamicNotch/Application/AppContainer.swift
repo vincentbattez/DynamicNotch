@@ -32,6 +32,7 @@ final class AppContainer {
         monitor: NotificationInboxMonitor(inboxDirectory: AppContainer.notificationsInboxDirectory)
     )
     let calendarViewModel = CalendarViewModel()
+    let screenshotViewModel = ScreenshotViewModel()
 
     let powerViewModel: PowerViewModel
     let downloadViewModel: DownloadViewModel
@@ -80,7 +81,8 @@ final class AppContainer {
         homePageViewModel: homePageViewModel,
         localTimerViewModel: localTimerViewModel,
         notificationCenterViewModel: notificationCenterViewModel,
-        calendarViewModel: calendarViewModel
+        calendarViewModel: calendarViewModel,
+        screenshotViewModel: screenshotViewModel
     )
 
     /// Carries the timer conflict/replacement policy. Its collaborators are passed as closures

@@ -146,6 +146,13 @@ enum NotchContentRegistry {
         )
     }
 
+    enum Screenshot {
+        static let active = NotchContentDescriptor(
+            id: "screenshot.active",
+            priority: NotchContentPriority.dragAndDrop
+        )
+    }
+
 
     enum NotchSize {
         static let width = NotchContentDescriptor(
