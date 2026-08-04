@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+#MISE description="Build the DynamicNotch app (CONFIG=Debug|Release, default Debug)"
+set -euo pipefail
+cd "$MISE_PROJECT_ROOT"
+
+CONFIG="${CONFIG:-Debug}"
+
+gum style --bold --foreground 212 "📦  Building DynamicNotch ($CONFIG)..."
+
+# -derivedDataPath is relative on purpose: each git worktree gets its own
+# DerivedData so concurrent builds can't corrupt each other.
+#
+# Signing stays disabled on purpose. Letting the project's ad-hoc identity apply
+# gives the bundle the real id (com.Jackson.DynamicNotch), which makes macOS
+# enforce Files-and-Folders TCC — the app then blocks at launch in
+# ScreenshotMonitorService/FolderFileDownloadMonitor `primeBaseline()` waiting on
+# a Desktop/Downloads consent that never resolves. Verified both ways.
+xcodebuild build \
+  -project DynamicNotch.xcodeproj \
+  -scheme DynamicNotch \
+  -configuration "$CONFIG" \
+  -destination 'platform=macOS' \
+  -derivedDataPath build \
+  -quiet \
+  CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" DEVELOPMENT_TEAM="" \
+  "$@"
+
+gum log --level info "Built build/Build/Products/$CONFIG/DynamicNotch.app"

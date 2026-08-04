@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+#MISE description="Verify Xcode toolchain and project are present"
+set -euo pipefail
+cd "$MISE_PROJECT_ROOT"
+
+if ! command -v xcodebuild >/dev/null 2>&1; then
+  gum log --level error "xcodebuild not found" fix "install Xcode, then: sudo xcode-select -s /Applications/Xcode.app"
+  exit 1
+fi
+
+if ! xcodebuild -version >/dev/null 2>&1; then
+  gum log --level error "xcodebuild is not usable (Command Line Tools only?)" fix "sudo xcode-select -s /Applications/Xcode.app"
+  exit 1
+fi
+
+if [ ! -d DynamicNotch.xcodeproj ]; then
+  gum log --level error "DynamicNotch.xcodeproj missing — wrong directory?"
+  exit 1
+fi
+
+gum log --level info "Toolchain OK — $(xcodebuild -version | head -1)"

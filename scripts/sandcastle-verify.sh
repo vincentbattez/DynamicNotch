@@ -9,18 +9,13 @@ set -euo pipefail
 PROJECT="DynamicNotch.xcodeproj"
 SIGNING=(CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" DEVELOPMENT_TEAM="")
 
-# Environmental failures: these assert against this machine's real display /
-# notch geometry, not against any code. See docs/agents/domain.md.
-SKIP=(
-  DynamicNotchTests/NotchTransitionMetricsTests/testHorizontalCompensationOffsetIsConstantRegardlessOfNotchWidth
-  DynamicNotchTests/NotchTransitionMetricsTests/testHorizontalCompensationOffsetMatchesExpandedReferenceWidth
-  DynamicNotchTests/NotchViewModelIntegrationTests/testDismissSwipeCompressesCollapsedNotchAlongWidth
-  DynamicNotchTests/NotchViewModelIntegrationTests/testPresentedNotchSizeStagesHeightDuringClosingTransition
-  DynamicNotchTests/NotchViewModelIntegrationTests/testUpdateDimensionsUsesSelectedDisplayMetrics
-  DynamicNotchTests/NotchViewModelIntegrationTests/testUpdateDimensionsUsesSpecificDisplayMetrics
-)
+# Environmental failures, listed in scripts/lib/skipped-tests.txt (shared with
+# the `test:unit` mise task). See docs/agents/domain.md.
 skip_args=()
-for test in "${SKIP[@]}"; do skip_args+=("-skip-testing:$test"); done
+while IFS= read -r test || [ -n "$test" ]; do
+  case "$test" in ''|'#'*) continue ;; esac
+  skip_args+=("-skip-testing:$test")
+done < "$(dirname "$0")/lib/skipped-tests.txt"
 
 xcodebuild build \
   -project "$PROJECT" -scheme DynamicNotchCLI -configuration Debug \

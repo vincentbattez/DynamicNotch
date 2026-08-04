@@ -1,0 +1,26 @@
+[settings]
+quiet = true          # let task scripts render directly (no [task-name] prefix in output)
+
+[tools]
+# gum is the rendering layer used by the scripts in mise-tasks/
+"aqua:charmbracelet/gum" = "latest"
+# node is only for the sandcastle agent tooling (package.json), not the app build
+node = "24"
+
+# --- Aggregators ---
+
+[tasks.check]
+description = "Verify the toolchain is ready to build"
+depends = ["check:xcode"]
+
+[tasks.build]
+description = "Build the app and the CLI (Debug)"
+depends = ["build:app", "build:cli"]
+
+[tasks.test]
+description = "Run the unit suite (UI tests are opt-in: mise run test:ui)"
+depends = ["test:unit"]
+
+[tasks.ci]
+description = "Full local gate: build + unit tests (mirrors scripts/sandcastle-verify.sh)"
+depends = ["verify"]

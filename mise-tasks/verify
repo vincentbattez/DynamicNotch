@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#MISE description="Verification gate: build the CLI then run the unit suite"
+set -euo pipefail
+cd "$MISE_PROJECT_ROOT"
+
+gum style --bold --foreground 212 "✅  Running the verification gate..."
+exec ./scripts/sandcastle-verify.sh "$@"

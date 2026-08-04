@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+#MISE description="Run the unit suite (serial, env-dependent geometry tests skipped)"
+set -euo pipefail
+cd "$MISE_PROJECT_ROOT"
+
+gum style --bold --foreground 212 "🧪  Running unit tests..."
+
+# A running instance competes with the tests for the notch window
+killall DynamicNotch 2>/dev/null || true
+
+# Skip list is shared with scripts/sandcastle-verify.sh — single source of truth.
+skip_args=()
+while IFS= read -r test || [ -n "$test" ]; do
+  case "$test" in ''|'#'*) continue ;; esac
+  skip_args+=("-skip-testing:$test")
+done < scripts/lib/skipped-tests.txt
+
+# The inbox tests race each other, so the suite runs serially.
+xcodebuild test \
+  -project DynamicNotch.xcodeproj \
+  -scheme DynamicNotch \
+  -destination 'platform=macOS' \
+  -derivedDataPath build \
+  -parallel-testing-enabled NO \
+  -only-testing:DynamicNotchTests \
+  "${skip_args[@]}" \
+  CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" DEVELOPMENT_TEAM="" \
+  "$@"

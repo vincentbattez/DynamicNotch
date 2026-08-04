@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+#MISE description="Bootstrap the project from a fresh clone"
+#MISE alias=["i"]
+set -euo pipefail
+cd "$MISE_PROJECT_ROOT"
+
+gum style --bold --foreground 212 "🚀  Initializing DynamicNotch..."
+
+mise run check:xcode
+
+# Resolve the SPM graph (Lottie, Sparkle, swift-argument-parser, local contract)
+gum log --level info "Resolving Swift Package dependencies..."
+xcodebuild -resolvePackageDependencies -project DynamicNotch.xcodeproj -quiet
+
+# Node tooling is optional — only the sandcastle agent orchestrator needs it
+if [ ! -d node_modules ]; then
+  gum log --level info "node_modules missing (sandcastle tooling only) — run 'npm install' if you need it"
+fi
+
+gum log --level info "Ready — run 'mise run dev' to build & launch the app"

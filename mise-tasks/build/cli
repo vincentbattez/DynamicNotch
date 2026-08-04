@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+#MISE description="Build the dynamicnotch CLI (CONFIG=Debug|Release, default Debug)"
+set -euo pipefail
+cd "$MISE_PROJECT_ROOT"
+
+CONFIG="${CONFIG:-Debug}"
+
+gum style --bold --foreground 212 "📦  Building dynamicnotch CLI ($CONFIG)..."
+
+xcodebuild build \
+  -project DynamicNotch.xcodeproj \
+  -scheme DynamicNotchCLI \
+  -configuration "$CONFIG" \
+  -destination 'platform=macOS' \
+  -derivedDataPath build \
+  -quiet \
+  CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" DEVELOPMENT_TEAM="" \
+  "$@"
+
+gum log --level info "Built build/Build/Products/$CONFIG/dynamicnotch"

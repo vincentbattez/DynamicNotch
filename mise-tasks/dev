@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+#MISE description="Rebuild (Debug) and relaunch the app"
+#MISE depends=["check"]
+set -euo pipefail
+cd "$MISE_PROJECT_ROOT"
+
+gum style --bold --foreground 212 "🚀  Rebuilding & relaunching DynamicNotch..."
+
+killall DynamicNotch 2>/dev/null || true
+mise run build:app
+open build/Build/Products/Debug/DynamicNotch.app
+
+gum log --level info "App relaunched"

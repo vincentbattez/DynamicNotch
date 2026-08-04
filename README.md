@@ -116,6 +116,28 @@ open DynamicNotch.xcodeproj
 
 Then run the `DynamicNotch` scheme from Xcode. Swift Package Manager dependencies are resolved by the project.
 
+### From the command line ([mise](https://mise.jdx.dev))
+
+```bash
+mise trust         # once per clone — mise refuses to run untrusted configs
+mise install       # gum (task renderer) + node (agent tooling only)
+mise run init      # check the Xcode toolchain, resolve the SPM graph
+mise run dev       # rebuild Debug and relaunch the app
+```
+
+| Task | What it does |
+| --- | --- |
+| `mise run build` | Build the app and the CLI (Debug). `CONFIG=Release mise run build:app` for Release |
+| `mise run dev` | Kill the running instance, rebuild Debug, relaunch |
+| `mise run test` | Unit suite, serial, with the env-dependent geometry tests skipped |
+| `mise run test:ui` | UI tests — drives the real display, opt-in |
+| `mise run ci` | Verification gate: build the CLI, then run the unit suite |
+| `mise run clean` | Delete the local DerivedData (`build/`) |
+
+`mise tasks ls` lists everything. Builds use a repo-local `build/` DerivedData so
+concurrent git worktrees never share state, and code signing is disabled — the
+binaries are for local use, not distribution.
+
 ## 🔔 Script Notifications
 
 DynamicNotch can receive notifications from any local script or process. When a notification

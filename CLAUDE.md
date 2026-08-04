@@ -11,12 +11,14 @@ L'écran des MacBook possède un **notch physique** — une encoche en haut au c
 À **chaque changement de code**, rebuild et relance l'application pour que je puisse valider le résultat en conditions réelles.
 
 ```sh
-# Tuer l'instance en cours, rebuild Debug, puis relancer
-killall DynamicNotch 2>/dev/null; \
-xcodebuild -project DynamicNotch.xcodeproj -scheme DynamicNotch -configuration Debug \
-  -derivedDataPath build build CODE_SIGNING_ALLOWED=NO \
-&& open build/Build/Products/Debug/DynamicNotch.app
+mise run dev   # kill l'instance en cours, rebuild Debug, relance
 ```
+
+Toutes les commandes du projet passent par mise (`mise tasks ls`) : `build`,
+`dev`, `test`, `test:ui`, `ci`, `clean`. Ne pas ré-écrire les invocations
+`xcodebuild` à la main — les tasks portent déjà le bon `-derivedDataPath`, les
+flags de signature et la liste des tests skippés
+(`scripts/lib/skipped-tests.txt`).
 
 ## Agent skills
 

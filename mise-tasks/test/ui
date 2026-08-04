@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+#MISE description="Run UI tests (drives the real screen — opt-in, not part of ci)"
+set -euo pipefail
+cd "$MISE_PROJECT_ROOT"
+
+gum style --bold --foreground 212 "🖥️   Running UI tests..."
+gum log --level warn "These drive the real display — don't touch the machine while they run"
+
+xcodebuild test \
+  -project DynamicNotch.xcodeproj \
+  -scheme DynamicNotch \
+  -destination 'platform=macOS' \
+  -derivedDataPath build \
+  -parallel-testing-enabled NO \
+  -only-testing:DynamicNotchUITests \
+  CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" DEVELOPMENT_TEAM="" \
+  "$@"

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#MISE description="Remove the local DerivedData (build/)"
+#MISE confirm="This deletes build/ (local DerivedData). Continue?"
+set -euo pipefail
+cd "$MISE_PROJECT_ROOT"
+
+rm -rf build
+gum log --level info "build/ removed"
