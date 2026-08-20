@@ -70,6 +70,10 @@ enum NotchContentRegistry {
             id: "clock.localTimer",
             priorityKey: .timer
         )
+        static let timerFinished = NotchContentDescriptor(
+            id: "clock.timerFinished",
+            priorityKey: .timer
+        )
     }
 
     enum HomePage {
@@ -105,6 +109,10 @@ enum NotchContentRegistry {
             id: "tray.active",
             priorityKey: .trayActive
         )
+        static let airDropTransferActive = NotchContentDescriptor(
+            id: "airDrop.transferActive",
+            priorityKey: .airDropTransferActive
+        )
         static let fileConverterActive = NotchContentDescriptor(
             id: "fileConverter.active",
             priorityKey: .fileConverterActive
@@ -134,6 +142,9 @@ enum NotchContentRegistry {
             id: "notifications.badge",
             priorityKey: .notifications
         )
+        static let mail = NotchContentDescriptor(
+            id: "mail.message"
+        )
     }
 
     enum Settings {
@@ -155,14 +166,8 @@ enum NotchContentRegistry {
 
 
     enum NotchSize {
-        static let width = NotchContentDescriptor(
-            id: "notchSize.width",
-            priority: NotchContentPriority.notchSizeWidth
-        )
-        static let height = NotchContentDescriptor(
-            id: "notchSize.height",
-            priority: NotchContentPriority.notchSizeHeight
-        )
+        static let width = NotchContentDescriptor(id: "notchSize.width")
+        static let height = NotchContentDescriptor(id: "notchSize.height")
     }
 
     enum Onboarding {

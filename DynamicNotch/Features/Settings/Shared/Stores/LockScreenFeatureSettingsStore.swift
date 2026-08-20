@@ -78,6 +78,12 @@ final class LockScreenFeatureSettingsStore: SettingsStoreBase {
         }
     }
 
+    @Published var isLockScreenArtworkExpanded: Bool {
+        didSet {
+            persist(isLockScreenArtworkExpanded, for: LockScreenSettings.artworkExpandedKey)
+        }
+    }
+
     @Published var mediaPanelVerticalOffset: Double {
         didSet {
             let clampedValue = min(
@@ -112,6 +118,7 @@ final class LockScreenFeatureSettingsStore: SettingsStoreBase {
         self.liquidGlassVariant = LockScreenSettings.liquidGlassVariant(in: defaults)
         self.mediaPanelBackgroundStyle = LockScreenSettings.mediaPanelBackgroundStyle(in: defaults)
         self.isLockScreenLyricsEnabled = LockScreenSettings.isLyricsEnabled(in: defaults)
+        self.isLockScreenArtworkExpanded = LockScreenSettings.isArtworkExpanded(in: defaults)
         self.mediaPanelVerticalOffset = LockScreenSettings.mediaPanelVerticalOffset(in: defaults)
         super.init(defaults: defaults)
 
@@ -139,8 +146,9 @@ final class LockScreenFeatureSettingsStore: SettingsStoreBase {
         liquidGlassVariant = defaultInt(for: LockScreenSettings.liquidGlassVariantKey)
         mediaPanelBackgroundStyle = LockScreenMediaPanelBackgroundStyle(
             rawValue: defaultString(for: LockScreenSettings.mediaPanelBackgroundStyleKey)
-        ) ?? .animatedArtwork
+        ) ?? .staticArtwork
         isLockScreenLyricsEnabled = defaultBool(for: LockScreenSettings.lyricsEnabledKey)
+        isLockScreenArtworkExpanded = defaultBool(for: LockScreenSettings.artworkExpandedKey)
         mediaPanelVerticalOffset = defaultDouble(for: LockScreenSettings.mediaPanelVerticalOffsetKey)
     }
 

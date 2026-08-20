@@ -115,6 +115,7 @@ extension SettingsRootViewModel {
             monitor: InactiveNotificationInboxMonitor()
         )
         let resolvedCalendarViewModel = calendarViewModel ?? CalendarViewModel()
+        let resolvedMailManager = MailManager()
         let resolvedCoordinator = notchEventCoordinator ?? NotchEventCoordinator(
             notchViewModel: resolvedNotchViewModel,
             bluetoothViewModel: resolvedBluetoothViewModel,
@@ -133,7 +134,8 @@ extension SettingsRootViewModel {
             homePageViewModel: resolvedHomePageViewModel,
             localTimerViewModel: resolvedLocalTimerViewModel,
             notificationCenterViewModel: resolvedNotificationCenterViewModel,
-            calendarViewModel: resolvedCalendarViewModel
+            calendarViewModel: resolvedCalendarViewModel,
+            mailManager: resolvedMailManager
         )
 
         return SettingsRootDebugDependencies(

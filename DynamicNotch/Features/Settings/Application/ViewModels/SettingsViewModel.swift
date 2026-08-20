@@ -20,6 +20,7 @@ final class SettingsViewModel: ObservableObject, NotchSettingsProviding {
         case lockScreen
         case screenRecording
         case calendar
+        case notifications
     }
 
     enum LiveActivityPreference {
@@ -293,6 +294,11 @@ final class SettingsViewModel: ObservableObject, NotchSettingsProviding {
         set { mediaAndFiles.isDragAndDropLiveActivityEnabled = newValue }
     }
 
+    var isAirDropLiveActivityEnabled: Bool {
+        get { mediaAndFiles.isAirDropLiveActivityEnabled }
+        set { mediaAndFiles.isAirDropLiveActivityEnabled = newValue }
+    }
+
     var isTimerLiveActivityEnabled: Bool {
         get { mediaAndFiles.isTimerLiveActivityEnabled }
         set { mediaAndFiles.isTimerLiveActivityEnabled = newValue }
@@ -489,6 +495,8 @@ final class SettingsViewModel: ObservableObject, NotchSettingsProviding {
             screenRecording.reset()
         case .calendar:
             calendar.resetCalendar()
+        case .notifications:
+            notifications.reset()
         }
     }
 

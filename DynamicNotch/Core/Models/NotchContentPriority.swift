@@ -8,6 +8,7 @@ enum NotchContentPriority {
         case hotspot
         case download
         case trayActive
+        case airDropTransferActive
         case nowPlaying
         case timer
         case calendar
@@ -29,6 +30,8 @@ enum NotchContentPriority {
                 NotchContentPriority.download
             case .trayActive:
                 NotchContentPriority.trayActive
+            case .airDropTransferActive:
+                NotchContentPriority.airDropTransferActive
             case .nowPlaying:
                 NotchContentPriority.nowPlaying
             case .timer:
@@ -56,6 +59,8 @@ enum NotchContentPriority {
                 "settings.notch.priorities.row.downloads"
             case .trayActive:
                 "settings.notch.priorities.row.trayActive"
+            case .airDropTransferActive:
+                "settings.notch.priorities.row.airDropTransferActive"
             case .nowPlaying:
                 "settings.notch.priorities.row.nowPlaying"
             case .timer:
@@ -83,6 +88,8 @@ enum NotchContentPriority {
                 return "arrow.down.circle.fill"
             case .trayActive:
                 return "tray.full.fill"
+            case .airDropTransferActive:
+                return "airdrop.white"
             case .fileConverterActive:
                 return "arrow.trianglehead.2.counterclockwise.rotate.90"
             case .nowPlaying:
@@ -110,6 +117,8 @@ enum NotchContentPriority {
                     .blue
             case .trayActive:
                     .black
+            case .airDropTransferActive:
+                    .blue
             case .fileConverterActive:
                     .green
             case .nowPlaying:
@@ -133,6 +142,7 @@ enum NotchContentPriority {
         .hotspot,
         .download,
         .trayActive,
+        .airDropTransferActive,
         .nowPlaying,
         .timer,
         .calendar,
@@ -146,22 +156,21 @@ enum NotchContentPriority {
     static let hotspot = 2
     static let download = 3
     static let trayActive = 4
-    static let nowPlaying = 5
-    static let timer = 6
-    static let calendar = 7
-    static let fileConverterActive = 8
-    static let screenRecording = 9
+    static let airDropTransferActive = 5
+    static let nowPlaying = 6
+    static let timer = 7
+    static let calendar = 8
+    static let fileConverterActive = 9
+    static let screenRecording = 10
     // Rest tier (peer of VPN, which also resolves to 0), above `homePage = -10000`: the
     // ambient badge is best-effort and yields to any higher-priority live activity.
     static let notifications = 0
 
     static let homePage = -10000
-    static let notchSizeWidth = 10000
-    static let notchSizeHeight = 10001
-    static let dragAndDrop = 10002
-    static let softwareUpdate = 10003
-    static let lockScreen = 10004
-    static let onboarding = 10005
+    static let dragAndDrop = 10001
+    static let softwareUpdate = 10002
+    static let lockScreen = 10003
+    static let onboarding = 10004
 
     static func resolvedValue(for key: Key, defaults: UserDefaults = .standard) -> Int {
         overrideValues(defaults: defaults)[key.rawValue] ?? key.defaultValue

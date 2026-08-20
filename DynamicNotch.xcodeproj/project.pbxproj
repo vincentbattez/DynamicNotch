@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0B9409DA3023B7F20092A512 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 0B9409D93023B7DA0092A512 /* libsqlite3.tbd */; };
 		E2761738300A66E900E79207 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = E2761737300A66E900E79207 /* Sparkle */; };
 		AAAA000000000000000000A4 /* DynamicNotchContract in Frameworks */ = {isa = PBXBuildFile; productRef = AAAA000000000000000000A2 /* DynamicNotchContract */; };
 		AAAA000000000000000000A5 /* DynamicNotchContract in Frameworks */ = {isa = PBXBuildFile; productRef = AAAA000000000000000000A3 /* DynamicNotchContract */; };
@@ -74,6 +75,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0B9409D93023B7DA0092A512 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 		E2A100012F90000000000001 /* DynamicNotch/Resources/MediaRemoteAdapter/MediaRemoteAdapter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DynamicNotch/Resources/MediaRemoteAdapter/MediaRemoteAdapter.framework; sourceTree = "<group>"; };
 		E2EF78512EDDB60E00F96D1E /* DynamicNotch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DynamicNotch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F10000000000000000000001 /* DynamicNotchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DynamicNotchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -151,6 +153,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0B9409DA3023B7F20092A512 /* libsqlite3.tbd in Frameworks */,
 				E2761738300A66E900E79207 /* Sparkle in Frameworks */,
 				E2C135B72F59FA8100348421 /* Lottie in Frameworks */,
 				AAAA000000000000000000A4 /* DynamicNotchContract in Frameworks */,
@@ -184,6 +187,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0B9409D83023B7DA0092A512 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				0B9409D93023B7DA0092A512 /* libsqlite3.tbd */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		E259C11B2F9D265D0016657D /* Recovered References */ = {
 			isa = PBXGroup;
 			children = (
@@ -201,6 +212,7 @@
 				F20000000000000000000002 /* DynamicNotchUITests */,
 				E2EF78522EDDB60E00F96D1E /* Products */,
 				E259C11B2F9D265D0016657D /* Recovered References */,
+				0B9409D83023B7DA0092A512 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -349,7 +361,42 @@
 				es,
 				Base,
 				ru,
+				tr,
 				"zh-Hans",
+				de,
+				fr,
+				pt,
+				ja,
+				ko,
+				it,
+				pl,
+				vi,
+				id,
+				nl,
+				"zh-Hant",
+				uk,
+				sv,
+				cs,
+				ar,
+				hi,
+				th,
+				ro,
+				hu,
+				el,
+				da,
+				fi,
+				nb,
+				ms,
+				he,
+				bg,
+				ca,
+				sk,
+				hr,
+				sr,
+				fil,
+				kk,
+				fa,
+				bn,
 			);
 			mainGroup = E2EF78482EDDB60E00F96D1E;
 			minimizedProjectReferenceProxies = 1;
@@ -615,7 +662,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 23;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_APP_SANDBOX = NO;
@@ -637,7 +684,7 @@
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "We need access to media data for display in Notch.";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "The app requires Bluetooth access to check the status of devices.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "The app requires access to your location to determine the name of your current Wi-Fi network.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "The app requires local network access to determine the name of your current Wi-Fi network.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -673,7 +720,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 23;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_APP_SANDBOX = NO;
@@ -695,7 +742,7 @@
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "We need access to media data for display in Notch.";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "The app requires Bluetooth access to check the status of devices.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "The app requires access to your location to determine the name of your current Wi-Fi network.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "The app requires local network access to determine the name of your current Wi-Fi network.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",

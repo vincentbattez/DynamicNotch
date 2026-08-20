@@ -14,11 +14,18 @@ private struct LockScreenOverlayGeometry: Equatable {
     let scale: CGFloat
 }
 
+private struct LockScreenContentSyncKey: Equatable {
+    let contentID: String?
+    let hasTemporary: Bool
+}
+
 @MainActor
 final class LockScreenLiveActivityWindowManager {
     private let notchViewModel: NotchViewModel
     private let lockScreenManager: LockScreenManager
     private let settingsViewModel: SettingsViewModel
+    private let airDropViewModel: AirDropNotchViewModel
+    private let airDropController: NotchAirDropController
     private let animator = LockScreenLiveActivityAnimator()
     
     private var overlayWindow: OverlayPanelWindow?
@@ -31,11 +38,15 @@ final class LockScreenLiveActivityWindowManager {
     init(
         notchViewModel: NotchViewModel,
         lockScreenManager: LockScreenManager,
-        settingsViewModel: SettingsViewModel
+        settingsViewModel: SettingsViewModel,
+        airDropViewModel: AirDropNotchViewModel,
+        airDropController: NotchAirDropController
     ) {
         self.notchViewModel = notchViewModel
         self.lockScreenManager = lockScreenManager
         self.settingsViewModel = settingsViewModel
+        self.airDropViewModel = airDropViewModel
+        self.airDropController = airDropController
         
         bindState()
         registerObservers()
@@ -79,7 +90,12 @@ final class LockScreenLiveActivityWindowManager {
             .store(in: &cancellables)
         
         notchViewModel.$notchModel
-            .map(\.content?.id)
+            .map { model in
+                LockScreenContentSyncKey(
+                    contentID: model.content?.id,
+                    hasTemporary: model.temporaryNotificationContent != nil
+                )
+            }
             .removeDuplicates()
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
@@ -176,26 +192,14 @@ final class LockScreenLiveActivityWindowManager {
         isPreparingLock: Bool,
         isLockIdle: Bool
     ) {
-        let isLockScreenContentReady = notchViewModel.notchModel.content?.id == NotchContentRegistry.LockScreen.activity.id
-        
-        guard LockScreenSettings.isLiveActivityEnabled() else {
+        let isTemporaryActive = notchViewModel.notchModel.temporaryNotificationContent != nil
+        guard LockScreenSettings.isLiveActivityEnabled() || isTemporaryActive else {
             hideOverlay(animated: true, releaseResources: true)
             return
         }
         
-        if isLocked {
-            guard isLockScreenContentReady else {
-                hideOverlay(animated: false)
-                return
-            }
-            
+        if isLocked || isPreparingLock {
             showLockedOverlay()
-        } else if isPreparingLock {
-            if isLockScreenContentReady {
-                showLockedOverlay()
-            } else {
-                hideOverlay(animated: false)
-            }
         } else if !isLockIdle {
             showUnlockingOverlay()
         } else {
@@ -221,10 +225,9 @@ final class LockScreenLiveActivityWindowManager {
             window.setFrame(targetFrame, display: true)
         }
         
-        let rootView = LockScreenLiveActivityOverlayView(
+        let rootView = LockScreenNotchOverlayView(
             notchViewModel: notchViewModel,
             settingsViewModel: settingsViewModel,
-            lockScreenManager: lockScreenManager,
             animator: animator
         )
         
@@ -293,7 +296,8 @@ final class LockScreenLiveActivityWindowManager {
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self, weak window] in
             guard let self else { return }
             
-            let shouldRemainVisible = LockScreenSettings.isLiveActivityEnabled() &&
+            let isTemporaryActive = self.notchViewModel.notchModel.temporaryNotificationContent != nil
+            let shouldRemainVisible = (LockScreenSettings.isLiveActivityEnabled() || isTemporaryActive) &&
             (self.lockScreenManager.isLocked || !self.lockScreenManager.isLockIdle)
             
             guard !shouldRemainVisible else { return }
@@ -333,10 +337,9 @@ final class LockScreenLiveActivityWindowManager {
         }
         
         hostingView?.frame = NSRect(origin: .zero, size: targetFrame.size)
-        hostingView?.rootView = AnyView(LockScreenLiveActivityOverlayView(
+        hostingView?.rootView = AnyView(LockScreenNotchOverlayView(
             notchViewModel: notchViewModel,
             settingsViewModel: settingsViewModel,
-            lockScreenManager: lockScreenManager,
             animator: animator
         ))
         
@@ -358,98 +361,15 @@ final class LockScreenLiveActivityWindowManager {
     }
     
     private func overlayFrame(on screen: NSScreen) -> NSRect {
-        OverlayWindowLayout.lockScreenCanvasFrame(on: screen)
+        OverlayWindowLayout.topAnchoredFrame(
+            on: screen,
+            size: OverlayWindowLayout.appCanvasSize
+        )
     }
     
     private func currentScreen() -> NSScreen? {
         NSScreen.preferredLockScreen ??
         NSScreen.preferredNotchScreen(for: settingsViewModel) ??
         NSScreen.screens.first
-    }
-}
-
-private struct LockScreenLiveActivityOverlayView: View {
-    @ObservedObject var notchViewModel: NotchViewModel
-    @ObservedObject var settingsViewModel: SettingsViewModel
-    @ObservedObject var lockScreenManager: LockScreenManager
-    @ObservedObject var animator: LockScreenLiveActivityAnimator
-    
-    var body: some View {
-        notchSurface
-            .overlay {
-                contentOverlay
-                    .environment(\.isDynamicIsland, notchViewModel.topInset == 0)
-                    .clipShape(Rectangle())
-            }
-            .environment(\.colorScheme, .dark)
-            .frame(
-                width: notchViewModel.interactiveNotchSize.width,
-                height: notchViewModel.interactiveNotchSize.height
-            )
-            .customNotchPressable(
-                notchViewModel: notchViewModel,
-                isPressed: $notchViewModel.isPressed,
-                baseSize: notchViewModel.interactiveNotchSize
-            )
-            .scaleEffect(animator.scale)
-            .opacity(animator.opacity)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .animation(notchViewModel.animations.strokeVisibility, value: settingsViewModel.isShowNotchStrokeEnabled)
-            .animation(notchViewModel.animations.notchVisibility, value: notchViewModel.showNotch)
-    }
-    
-    @ViewBuilder
-    private var notchSurface: some View {
-        let isDynamicIsland = notchViewModel.topInset == 0
-        let shouldShowStroke = settingsViewModel.application.isShowNotchStrokeEnabled
-        NotchBackgroundSurface(
-            style: settingsViewModel.application.notchBackgroundStyle,
-            topCornerRadius: notchViewModel.interactiveCornerRadius.top,
-            bottomCornerRadius: notchViewModel.interactiveCornerRadius.bottom,
-            isDynamicIsland: isDynamicIsland,
-            dynamicIslandCornerRadius: notchViewModel.dynamicIslandCornerRadius,
-            strokeColor: shouldShowStroke ? visibleStrokeColor : .clear,
-            strokeWidth: settingsViewModel.notchStrokeWidth,
-            height: notchViewModel.interactiveNotchSize.height,
-            baseHeight: notchViewModel.notchModel.baseHeight
-        )
-    }
-    
-    private var visibleStrokeColor: Color {
-        let strokeOpacity = settingsViewModel.application.notchStrokeOpacity
-        let isDefaultStroke = settingsViewModel.application.isDefaultActivityStrokeEnabled
-        
-        let baseColor: Color
-        if isDefaultStroke {
-            baseColor = .white.opacity(0.2)
-        } else {
-            baseColor = notchViewModel.notchModel.content?.strokeColor ?? notchViewModel.cachedStrokeColor
-        }
-        return baseColor.opacity(strokeOpacity)
-    }
-    
-    @ViewBuilder
-    private var contentOverlay: some View {
-        if let content = notchViewModel.notchModel.content {
-            renderedContentView(for: content)
-                .id(notchViewModel.notchModel.presentationID)
-                .transition(
-                    notchViewModel.contentTransition(
-                        notchHeight: notchViewModel.interactiveNotchSize.height,
-                        baseHeight: notchViewModel.notchModel.baseHeight,
-                        isExpandedPresentation: notchViewModel.notchModel.isPresentingExpandedLiveActivity
-                    )
-                )
-        }
-    }
-    
-    @MainActor
-    @ViewBuilder
-    private func renderedContentView(for content: NotchContentProtocol) -> some View {
-        if notchViewModel.notchModel.isPresentingExpandedLiveActivity {
-            content.makeExpandedView()
-        } else {
-            content.makeView()
-        }
     }
 }

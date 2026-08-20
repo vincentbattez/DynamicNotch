@@ -115,6 +115,8 @@ struct SettingsRootView: View {
                                         title: localized(section.titleKey, fallback: section.fallbackTitle),
                                         imageName: imageName,
                                         tint: section.tint,
+                                        iconColor: section.iconColor,
+                                        stroke: section.stroke,
                                         showBadge: section == .general && updater.isUpdateAvailable
                                     )
                                 } else {
@@ -122,6 +124,8 @@ struct SettingsRootView: View {
                                         title: localized(section.titleKey, fallback: section.fallbackTitle),
                                         systemImage: section.systemImage,
                                         tint: section.tint,
+                                        iconColor: section.iconColor,
+                                        stroke: section.stroke,
                                         showBadge: section == .general && updater.isUpdateAvailable
                                     )
                                 }
@@ -427,6 +431,13 @@ struct SettingsRootView: View {
                  )
             }
             
+        #if DEBUG
+        case .debug:
+            detailContainer(for: section) {
+                DebugSettingsView(viewModel: viewModel.debugViewModel)
+            }
+        #endif
+            
         case .calendar:
             detailContainer(for: section) {
                 CalendarSettingsView(
@@ -434,6 +445,16 @@ struct SettingsRootView: View {
                 )
             }
 
+        case .notifications:
+            detailContainer(for: section) {
+                NotificationsSettingsView(
+                    settings: settingsViewModel.notifications,
+                    permissionController: permissionController,
+                    notificationCenterViewModel: notificationCenterViewModel,
+                    inboxURL: AppContainer.notificationsInboxDirectory
+                )
+            }
+            
         case .downloads:
             detailContainer(for: section) {
                 DownloadsSettingsView(
@@ -445,14 +466,6 @@ struct SettingsRootView: View {
         case .drop:
             detailContainer(for: section) {
                 DragAndDropSettingsView(
-                    mediaSettings: settingsViewModel.mediaAndFiles,
-                    appearanceSettings: settingsViewModel.application
-                )
-            }
-
-        case .timer:
-            detailContainer(for: section) {
-                TimerSettingsView(
                     mediaSettings: settingsViewModel.mediaAndFiles,
                     appearanceSettings: settingsViewModel.application
                 )
@@ -519,14 +532,6 @@ struct SettingsRootView: View {
                 LockScreenSettingsView(settings: settingsViewModel.lockScreen, applicationSettings: settingsViewModel.application)
             }
 
-        case .notifications:
-            detailContainer(for: section) {
-                NotificationsSettingsView(
-                    settings: settingsViewModel.notifications,
-                    notificationCenterViewModel: notificationCenterViewModel,
-                    inboxURL: AppContainer.notificationsInboxDirectory
-                )
-            }
         }
     }
 
@@ -567,7 +572,7 @@ struct SettingsRootView: View {
                 Button {
                     pendingResetSubPage = subPage
                 } label: {
-                    Text("Reset")
+                    Text(localized("settings.reset.action", fallback: "Reset"))
                 }
                 .help(
                     String(
@@ -642,6 +647,16 @@ struct SettingsRootView: View {
             HomePagePagesSettingsView(
                 homePageSettings: settingsViewModel.homePage
             )
+        case .timer:
+            TimerSettingsView(
+                mediaSettings: settingsViewModel.mediaAndFiles,
+                appearanceSettings: settingsViewModel.application
+            )
+        case .appleMail:
+            AppleMailNotificationsSettingsView(
+                settings: settingsViewModel.notifications,
+                permissionController: permissionController
+            )
         }
     }
 
@@ -688,6 +703,8 @@ struct SettingsRootView: View {
             settingsViewModel.mediaAndFiles.resetFileConverter()
         case .homePagePages:
             settingsViewModel.homePage.resetHomePage()
+        case .appleMail:
+            settingsViewModel.notifications.reset()
         default:
             break
         }

@@ -24,7 +24,7 @@ struct DebugSettingsView: View {
     }
     
     private var persistentPreviewsCard: some View {
-        SettingsCard(title: "Persistent Events") {
+        SettingsCard(title: "settings.debug.card.persistentEvents") {
             SettingsToggleRow(
                 title: "Onboarding",
                 description: "Show a safe debug preview of the onboarding live activity.",
@@ -178,7 +178,7 @@ struct DebugSettingsView: View {
     }
     
     private var triggerEventsCard: some View {
-        SettingsCard(title: "Trigger Events") {
+        SettingsCard(title: "settings.debug.card.triggerEvents") {
             DebugActionRow(
                 title: "Play All Events",
                 description: "Run every debug event in sequence, keep each item visible for its configured duration, and wait 1 second between items.",
@@ -254,6 +254,16 @@ struct DebugSettingsView: View {
             debugDivider
 
             DebugActionRow(
+                title: "AirDrop Transfer",
+                description: "Show active AirDrop file transfer progress and completion.",
+                imageName: "airdrop.white",
+                color: .blue,
+                action: viewModel.triggerAirDropTransferPreview
+            )
+
+            debugDivider
+
+            DebugActionRow(
                 title: "Converter Converting",
                 description: "Show the converter collapsed converting state.",
                 systemImage: "arrow.triangle.2.circlepath",
@@ -312,6 +322,71 @@ struct DebugSettingsView: View {
                 systemImage: "bolt.horizontal.circle.fill",
                 color: .blue,
                 action: viewModel.triggerBluetoothPreview
+            )
+            
+            Divider()
+                .opacity(0.6)
+                .padding(.leading, 43)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
+
+            DebugActionRow(
+                title: "Mail (Standard)",
+                description: "Show standard Mail notification with sender, subject, and summary.",
+                systemImage: "envelope.fill",
+                color: .yellow,
+                action: viewModel.triggerMailPreview
+            )
+            
+            Divider()
+                .opacity(0.6)
+                .padding(.leading, 43)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
+
+            DebugActionRow(
+                title: "Mail (No Summary)",
+                description: "Show compact Mail notification without body summary preview.",
+                systemImage: "envelope.fill",
+                color: .yellow,
+                action: viewModel.triggerMailNoSummaryPreview
+            )
+
+            Divider()
+                .opacity(0.6)
+                .padding(.leading, 43)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
+
+            DebugActionRow(
+                title: "Mail (No Subject)",
+                description: "Show Mail notification with empty subject line.",
+                systemImage: "envelope.fill",
+                color: .yellow,
+                action: viewModel.triggerMailNoSubjectPreview
+            )
+
+            Divider()
+                .opacity(0.6)
+                .padding(.leading, 43)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
+
+            DebugActionRow(
+                title: "Mail (No Subject & Summary)",
+                description: "Show minimal Mail notification with sender only.",
+                systemImage: "envelope.fill",
+                color: .yellow,
+                action: viewModel.triggerMailNoSubjectNoSummaryPreview
+            )
+
+            Divider()
+                .opacity(0.6)
+                .padding(.leading, 43)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
+
+            DebugActionRow(
+                title: "Mail (Long Text)",
+                description: "Show Mail notification with long sender, subject, and summary.",
+                systemImage: "envelope.fill",
+                color: .yellow,
+                action: viewModel.triggerMailLongContentPreview
             )
             
             Divider()
@@ -622,7 +697,7 @@ struct DebugSettingsView: View {
     }
 
     private var utilitiesCard: some View {
-        SettingsCard(title: "Utilities") {
+        SettingsCard(title: "settings.debug.card.utilities") {
             DebugActionRow(
                 title: "Hide Current Temporary",
                 description: "Dismiss the currently visible temporary notification.",
@@ -647,7 +722,8 @@ struct DebugSettingsView: View {
 struct DebugActionRow: View {
     let title: LocalizedStringKey
     let description: LocalizedStringKey
-    let systemImage: String
+    let systemImage: String?
+    let imageName: String?
     let color: Color
     let buttonTitle: LocalizedStringKey
     let action: () -> Void
@@ -663,6 +739,24 @@ struct DebugActionRow: View {
         self.title = title
         self.description = description
         self.systemImage = systemImage
+        self.imageName = nil
+        self.color = color
+        self.buttonTitle = buttonTitle
+        self.action = action
+    }
+
+    init(
+        title: LocalizedStringKey,
+        description: LocalizedStringKey,
+        imageName: String,
+        color: Color,
+        buttonTitle: LocalizedStringKey = "Start",
+        action: @escaping () -> Void
+    ) {
+        self.title = title
+        self.description = description
+        self.systemImage = nil
+        self.imageName = imageName
         self.color = color
         self.buttonTitle = buttonTitle
         self.action = action
@@ -670,14 +764,24 @@ struct DebugActionRow: View {
     
     var body: some View {
         HStack(alignment: .center, spacing: 14) {
-            Image(systemName: systemImage)
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(width: 30, height: 30)
-                .background(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(color.gradient)
+            if let systemImage {
+                Image(systemName: systemImage)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 30, height: 30)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(color.gradient)
+                    )
+            } else if let imageName {
+                SettingsIconBadge(
+                    imageName: imageName,
+                    tint: color,
+                    size: 30,
+                    iconSize: 14,
+                    cornerRadius: 10
                 )
+            }
             
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)

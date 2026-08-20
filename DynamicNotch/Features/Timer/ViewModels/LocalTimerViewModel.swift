@@ -1,5 +1,6 @@
-import SwiftUI
+internal import AppKit
 import Combine
+import SwiftUI
 
 enum LocalTimerState {
     case stopped
@@ -17,6 +18,7 @@ class LocalTimerViewModel: ObservableObject {
     var totalTime: TimeInterval = 0
     var endDate: Date?
     var pausedRemaining: TimeInterval?
+    var onTimerFinished: (() -> Void)?
 
     private var timer: AnyCancellable?
 
@@ -38,6 +40,14 @@ class LocalTimerViewModel: ObservableObject {
         self.label = label.flatMap {
             $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : $0
         }
+        remainingTime = totalTime
+        pausedRemaining = nil
+        endDate = Date().addingTimeInterval(totalTime)
+        resume()
+    }
+    
+    func restart() {
+        guard totalTime > 0 else { return }
         remainingTime = totalTime
         pausedRemaining = nil
         endDate = Date().addingTimeInterval(totalTime)
@@ -69,9 +79,14 @@ class LocalTimerViewModel: ObservableObject {
                 let rem = self.remainingTime(at: Date())
                 self.remainingTime = rem
                 if rem <= 0 {
-                    self.stop()
+                    self.timerFinished()
                 }
             }
+    }
+
+    private func timerFinished() {
+        stop()
+        onTimerFinished?()
     }
     
     func stop() {

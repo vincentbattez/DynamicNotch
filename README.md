@@ -317,13 +317,7 @@ Rules:
 
 ## 🌍 Localization
 
-The project currently includes localized app content for:
-
-- System language fallback
-- English
-- Russian
-- Spanish
-- Simplified Chinese
+DynamicNotch features full native localization support for **38+ languages** across interface elements, notch activities, and settings. You can switch languages instantly in the app settings.
 
 ## 💖 Support
 

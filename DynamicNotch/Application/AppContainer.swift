@@ -41,6 +41,7 @@ final class AppContainer {
     let screenRecordingViewModel: ScreenRecordingViewModel
     let lockScreenManager: LockScreenManager
     let clockTimerController: any ClockTimerControlling
+    let mailManager: MailManager
 
     lazy var hardwareHUDMonitor: HardwareHUDMonitor = {
         MainActor.assumeIsolated {
@@ -82,7 +83,8 @@ final class AppContainer {
         localTimerViewModel: localTimerViewModel,
         notificationCenterViewModel: notificationCenterViewModel,
         calendarViewModel: calendarViewModel,
-        screenshotViewModel: screenshotViewModel
+        screenshotViewModel: screenshotViewModel,
+        mailManager: mailManager
     )
 
     /// Carries the timer conflict/replacement policy. Its collaborators are passed as closures
@@ -121,7 +123,9 @@ final class AppContainer {
     lazy var lockScreenLiveActivityWindowManager = LockScreenLiveActivityWindowManager(
         notchViewModel: notchViewModel,
         lockScreenManager: lockScreenManager,
-        settingsViewModel: settingsViewModel
+        settingsViewModel: settingsViewModel,
+        airDropViewModel: airDropViewModel,
+        airDropController: airDropController
     )
 
     init(isRunningUITests: Bool = ProcessInfo.processInfo.arguments.contains("-ui-testing")) {
@@ -172,5 +176,6 @@ final class AppContainer {
                 InactiveLockScreenSoundPlayer() :
                 LockScreenSoundPlayer()
         )
+        self.mailManager = MailManager()
     }
 }

@@ -10,7 +10,7 @@ struct HomePagePagesSettingsView: View {
     }
 
     private var homePagePages: some View {
-        SettingsCard(title: "Pages") {
+        SettingsCard() {
             SettingsOrderListView(
                 items: $homePageSettings.homePageOrder,
                 disabledItems: $homePageSettings.homePageDisabled,
@@ -24,7 +24,7 @@ struct HomePagePagesSettingsView: View {
 
             Divider().opacity(0.6)
 
-            Text(LocalizedStringKey("Drag to reorder pages. Disabled pages will be hidden."))
+            Text(LocalizedStringKey("settings.homePage.pages.reorderHint"))
                 .font(.caption)
                 .foregroundColor(.gray)
                 .opacity(homePageSettings.isHomePageLiveActivityEnabled ? 1.0 : 0.5)

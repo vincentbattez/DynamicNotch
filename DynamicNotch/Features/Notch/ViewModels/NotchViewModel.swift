@@ -76,6 +76,11 @@ final class NotchViewModel: ObservableObject {
     
     var canExpandActiveLiveActivity: Bool {
         guard !isActivityPresentationHidden || notchModel.temporaryNotificationContent != nil else { return false }
+        if isLocked {
+            guard notchModel.temporaryNotificationContent != nil || notchModel.liveActivityContent?.id == NotchContentRegistry.LockScreen.activity.id else {
+                return false
+            }
+        }
         return engine.canExpandActiveLiveActivity
     }
     
@@ -115,10 +120,12 @@ final class NotchViewModel: ObservableObject {
     }
     
     var canRestoreDismissedContent: Bool {
-        engine.canRestoreDismissedContent
+        guard !isLocked else { return false }
+        return engine.canRestoreDismissedContent
     }
 
     var canOpenActiveWindowLink: Bool {
+        guard !isLocked else { return false }
         guard !isActivityPresentationHidden || notchModel.temporaryNotificationContent != nil else { return false }
         return engine.canOpenActiveWindowLink
     }
@@ -127,12 +134,13 @@ final class NotchViewModel: ObservableObject {
         settings.isNotchMouseDragGesturesEnabled &&
         settings.isNotchSwipeDismissEnabled &&
         (!isActivityPresentationHidden || notchModel.temporaryNotificationContent != nil) &&
-        notchModel.content != nil &&
-        (notchModel.content?.id != NotchContentRegistry.HomePage.active.id || notchModel.isLiveActivityExpanded)
+        displayedContent != nil &&
+        (displayedContent?.id != NotchContentRegistry.HomePage.active.id || notchModel.isLiveActivityExpanded)
     }
     
     var canRestoreWithMouseDrag: Bool {
-        settings.isNotchMouseDragGesturesEnabled &&
+        guard !isLocked else { return false }
+        return settings.isNotchMouseDragGesturesEnabled &&
         settings.isNotchSwipeRestoreEnabled &&
         canRestoreDismissedContent
     }
@@ -141,12 +149,13 @@ final class NotchViewModel: ObservableObject {
         settings.isNotchTrackpadSwipeGesturesEnabled &&
         settings.isNotchSwipeDismissEnabled &&
         (!isActivityPresentationHidden || notchModel.temporaryNotificationContent != nil) &&
-        notchModel.content != nil &&
-        (notchModel.content?.id != NotchContentRegistry.HomePage.active.id || notchModel.isLiveActivityExpanded)
+        displayedContent != nil &&
+        (displayedContent?.id != NotchContentRegistry.HomePage.active.id || notchModel.isLiveActivityExpanded)
     }
     
     var canRestoreWithTrackpadSwipe: Bool {
-        settings.isNotchTrackpadSwipeGesturesEnabled &&
+        guard !isLocked else { return false }
+        return settings.isNotchTrackpadSwipeGesturesEnabled &&
         settings.isNotchSwipeRestoreEnabled &&
         canRestoreDismissedContent
     }
@@ -228,7 +237,7 @@ final class NotchViewModel: ObservableObject {
     }
     
     var contentResizeBlurRadius: CGFloat {
-        let progress = easedSwipeStretchProgress
+        let progress = min(1.0, easedSwipeStretchProgress)
         
         switch swipeInteraction {
         case .dismiss:
@@ -294,14 +303,15 @@ final class NotchViewModel: ObservableObject {
         let screenWidth = screenMetrics.width
         let baseScreenWidth: CGFloat = 1440.0
         let scale = max(0.35, screenWidth / baseScreenWidth)
+        let widthScale = scale > 1.0 ? 1.0 + (scale - 1.0) * 0.35 : scale
         
         let isDynamicIsland = screenMetrics.topInset == 0
         let widthOffset = CGFloat(settings.notchWidth)
         let heightOffset = CGFloat(settings.notchHeight)
-        let baseHeightAdjustment: CGFloat = isDynamicIsland ? -3 : 0
+        let baseHeightAdjustment: CGFloat = isDynamicIsland ? -1 : 0
         
         if let notchSize = screenMetrics.notchSize {
-            let baseWidth = notchSize.width + 14.scaled(by: scale) + widthOffset
+            let baseWidth = notchSize.width + 14.scaled(by: widthScale) + widthOffset
             let finalWidth = isDynamicIsland ? baseWidth * 0.85 : baseWidth
             
             engine.updateBaseGeometry(
@@ -312,11 +322,13 @@ final class NotchViewModel: ObservableObject {
             )
             
         } else {
-            let baseWidthValue: CGFloat = isDynamicIsland ? 100 : 190
+            let baseWidthValue: CGFloat = isDynamicIsland ? 120 : 190
+            let baseWidth = (baseWidthValue * widthScale) + widthOffset
+            let finalWidth = isDynamicIsland ? baseWidth * 0.85 : baseWidth
             
             engine.updateBaseGeometry(
-                width: (baseWidthValue * scale) + widthOffset,
-                height: (25 * scale) + heightOffset + baseHeightAdjustment,
+                width: finalWidth,
+                height: 26 + heightOffset + baseHeightAdjustment,
                 scale: scale,
                 isDynamicIsland: isDynamicIsland
             )
@@ -348,6 +360,11 @@ final class NotchViewModel: ObservableObject {
     }
     
     func dismissActiveContent() {
+        if isLocked {
+            resetSwipeStretch()
+            return
+        }
+
         if notchModel.isLiveActivityExpanded {
             engine.handleOutsideClick()
             return
@@ -361,6 +378,11 @@ final class NotchViewModel: ObservableObject {
     }
     
     func restoreDismissedContent() {
+        if isLocked {
+            resetSwipeStretch()
+            return
+        }
+
         engine.restoreDismissedContent()
     }
 
@@ -370,7 +392,14 @@ final class NotchViewModel: ObservableObject {
             return
         }
         
-        if settings.isCloseAtFocusLiveActivityEnabled {
+        if notchModel.temporaryNotificationContent != nil {
+            engine.openActiveWindowLink()
+            engine.hideTemporaryNotification()
+            return
+        }
+        
+        let isFocus = content.id == NotchContentRegistry.Focus.active.id || content.id == NotchContentRegistry.Focus.inactive.id
+        if isFocus && settings.isCloseAtFocusLiveActivityEnabled {
             triggerFocusCloseAnimation(for: content.id) { [weak self] in
                 self?.engine.openActiveWindowLink()
                 self?.send(.hideLiveActivity(id: content.id))
@@ -496,16 +525,6 @@ final class NotchViewModel: ObservableObject {
     }
 
     private var displayedNotchModel: NotchModel {
-        if isLocked {
-            var model = notchModel
-            model.temporaryNotificationContent = nil
-            if model.liveActivityContent?.id != NotchContentRegistry.LockScreen.activity.id {
-                model.liveActivityContent = nil
-                model.isLiveActivityExpanded = false
-            }
-            return model
-        }
-
         guard isActivityPresentationHidden else {
             return notchModel
         }
@@ -517,20 +536,19 @@ final class NotchViewModel: ObservableObject {
     }
 
     func contentTransition(notchHeight: CGFloat, baseHeight: CGFloat, isExpandedPresentation: Bool) -> AnyTransition {
-
-        let baseTransition = AnyTransition.notchContent(
-            notchHeight: notchHeight,
-            baseHeight: baseHeight,
-            isExpandedPresentation: isExpandedPresentation,
-        )
+        let expandedTransition = AnyTransition.notchExpanded(notchHeight: notchHeight, baseHeight: baseHeight)
+        let compactTransition = AnyTransition.notchCompact(notchHeight: notchHeight, baseHeight: baseHeight)
 
         if isExpandedPresentation {
             return .asymmetric(
-                insertion: baseTransition.animation(animations.expandLiveActivityContentTransition),
-                removal: baseTransition.animation(animations.closeLiveActivityContentTransition)
+                insertion: expandedTransition.animation(animations.expandLiveActivityContentTransition),
+                removal: expandedTransition.animation(animations.closeLiveActivityContentTransition)
             )
         } else {
-            return baseTransition.animation(animations.openContentTransition)
+            return .asymmetric(
+                insertion: compactTransition.animation(animations.closeLiveActivityContentTransition),
+                removal: compactTransition.animation(animations.openContentTransition)
+            )
         }
     }
     

@@ -19,6 +19,8 @@ enum SettingsSubPage: Hashable, Identifiable {
     case fileTray
     case fileConverter
     case homePagePages
+    case timer
+    case appleMail
     
     var id: Self { self }
     var titleKey: String {
@@ -28,7 +30,7 @@ enum SettingsSubPage: Hashable, Identifiable {
         case .language: return "settings.section.language.title"
         case .system: return "settings.general.system.title"
         case .permissions: return "settings.section.permissions.title"
-        case .softwareUpdate: return "Software Update"
+        case .softwareUpdate: return "settings.section.softwareUpdate.title"
         case .support: return "settings.general.support.title"
         case .about: return "settings.section.about.title"
         #if DEBUG
@@ -36,11 +38,13 @@ enum SettingsSubPage: Hashable, Identifiable {
         #endif
         case .activityPriorities: return "settings.notch.priorities.title"
         case .notchDisplay: return "settings.notch.display.title"
-        case .notchAnimation: return "Animation"
-        case .gestures: return "Gestures"
-        case .fileTray: return "Tray"
-        case .fileConverter: return "settings.homePage.fileConverter.title"
+        case .notchAnimation: return "settings.notch.animation.title"
+        case .gestures: return "settings.notch.gestures.title"
+        case .fileTray: return "settings.drop.tray.title"
+        case .fileConverter: return "settings.fileConverter.title"
         case .homePagePages: return "settings.homePage.pages.title"
+        case .timer: return "settings.section.timer.title"
+        case .appleMail: return "settings.notifications.appleMail.title"
         }
     }
     
@@ -64,6 +68,8 @@ enum SettingsSubPage: Hashable, Identifiable {
         case .fileTray: return "Tray"
         case .fileConverter: return "File Converter"
         case .homePagePages: return "Pages"
+        case .timer: return "Timer"
+        case .appleMail: return "Apple Mail"
         }
     }
     
@@ -74,7 +80,7 @@ enum SettingsSubPage: Hashable, Identifiable {
         case .language: return "settings.section.language.subtitle"
         case .system: return "settings.general.system.subtitle"
         case .permissions: return "settings.section.permissions.subtitle"
-        case .softwareUpdate: return "Check for updates and manage update preferences."
+        case .softwareUpdate: return "settings.section.softwareUpdate.subtitle"
         case .support: return "settings.general.support.subtitle"
         case .about: return "settings.section.about.subtitle"
         #if DEBUG
@@ -84,9 +90,11 @@ enum SettingsSubPage: Hashable, Identifiable {
         case .notchDisplay: return "settings.notch.display.subtitle"
         case .notchAnimation: return "settings.notch.animation.subtitle"
         case .gestures: return "settings.notch.gestures.subtitle"
-        case .fileTray: return "settings.dragAndDrop.tray.subtitle"
-        case .fileConverter: return "settings.homePage.fileConverter.subtitle"
+        case .fileTray: return "settings.drop.tray.subtitle"
+        case .fileConverter: return "settings.fileConverter.subtitle"
         case .homePagePages: return "settings.homePage.pages.subtitle"
+        case .timer: return "settings.section.timer.subtitle"
+        case .appleMail: return "settings.notifications.appleMail.subtitle"
         }
     }
     
@@ -110,12 +118,14 @@ enum SettingsSubPage: Hashable, Identifiable {
         case .fileTray: return "Configure file tray behavior, scroll direction, and appearance."
         case .fileConverter: return "Configure output location, existing file behavior, and quality."
         case .homePagePages: return "Reorder or enable/disable home page cards."
+        case .timer: return "Clock timer live activity and stroke appearance."
+        case .appleMail: return "Incoming email notifications and duration."
         }
     }
     
     var canReset: Bool {
         switch self {
-        case .appearance, .notch, .language, .activityPriorities, .notchDisplay, .notchAnimation, .gestures, .fileTray, .fileConverter, .homePagePages:
+        case .appearance, .notch, .language, .activityPriorities, .notchDisplay, .notchAnimation, .gestures, .fileTray, .fileConverter, .homePagePages, .timer, .appleMail:
             return true
         default:
             return false

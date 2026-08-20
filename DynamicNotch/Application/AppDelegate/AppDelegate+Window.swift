@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 extension AppDelegate {
     func createNotchWindow() {
@@ -23,7 +24,6 @@ extension AppDelegate {
 
         let hostingView = NotchHostingView(
             rootView: NotchView(
-                notchViewModel: notchViewModel,
                 notchEventCoordinator: notchEventCoordinator,
                 powerViewModel: powerViewModel,
                 bluetoothViewModel: bluetoothViewModel,
@@ -31,14 +31,15 @@ extension AppDelegate {
                 vpnViewModel: vpnViewModel,
                 downloadViewModel: downloadViewModel,
                 focusViewModel: focusViewModel,
-                airDropViewModel: airDropViewModel,
-                airDropController: airDropController,
-                settingsViewModel: settingsViewModel,
                 nowPlayingViewModel: nowPlayingViewModel,
                 timerViewModel: timerViewModel,
                 screenRecordingViewModel: screenRecordingViewModel,
                 lockScreenManager: lockScreenManager,
-                homePageViewModel: homePageViewModel
+                homePageViewModel: homePageViewModel,
+                notchViewModel: notchViewModel,
+                airDropViewModel: airDropViewModel,
+                airDropController: airDropController,
+                settingsViewModel: settingsViewModel
             )
         )
 
@@ -48,6 +49,7 @@ extension AppDelegate {
         )
         SkyLightOperator.shared.delegateWindow(window, to: .notchSurface)
         updateWindowFrame()
+        reRegisterDragDestination(for: window)
     }
 
     @objc
@@ -79,12 +81,10 @@ extension AppDelegate {
 
         isPrimaryWindowSuspendedForLock = true
         notchViewModel.isLocked = true
+        airDropController.resetTargetState()
         clearNowPlayingPrimaryWindowPresentationState()
-        notchViewModel.setActivityPresentationHidden(false)
         
-        window.level = OverlayWindowLevel.lockScreenNotch
-        SkyLightOperator.shared.delegateWindow(window, to: .lockScreenNotchOverlay)
-        window.orderFrontRegardless()
+        window.orderOut(nil)
     }
 
     func restorePrimaryWindowForUnlockTransition() {
@@ -92,10 +92,44 @@ extension AppDelegate {
 
         isPrimaryWindowSuspendedForLock = false
         notchViewModel.isLocked = false
+        airDropController.resetTargetState()
         
-        window.level = OverlayWindowLevel.interactiveNotch
-        SkyLightOperator.shared.delegateWindow(window, to: .notchSurface)
         updateWindowFrame()
+        reRegisterDragDestination(for: window)
+    }
+
+    func reRegisterDragDestination(for window: NSWindow) {
+        let dragTypes: [NSPasteboard.PasteboardType] = [
+            .fileURL,
+            .URL,
+            NSPasteboard.PasteboardType(UTType.data.identifier)
+        ]
+
+        func notifyViews(_ view: NSView) {
+            if let dragView = view as? DragAndDropView {
+                dragView.registerTypes()
+            }
+            for subview in view.subviews {
+                notifyViews(subview)
+            }
+        }
+
+        func performRegistration() {
+            window.registerForDraggedTypes(dragTypes)
+            if let contentView = window.contentView {
+                notifyViews(contentView)
+            }
+        }
+
+        // Immediate pass
+        performRegistration()
+
+        // Staggered passes to ensure WindowServer space transition has finished
+        for delay in [0.2, 0.6, 1.0] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                performRegistration()
+            }
+        }
     }
 
     private func updatePrimaryWindowPresentation(on screen: NSScreen) {

@@ -61,6 +61,7 @@ enum GeneralSettingsStorage {
         static let downloadsLiveActivityEnabled = "settings.live.downloads"
         static let downloadsDefaultStrokeEnabled = "settings.live.downloads.defaultStroke"
         static let downloadsProgressIndicatorStyle = "settings.live.downloads.progressIndicatorStyle"
+        static let dragAndDropLiveActivityEnabled = "settings.live.dragAndDrop"
         static let airDropLiveActivityEnabled = "settings.live.airDrop"
         static let airDropDefaultStrokeEnabled = "settings.live.airDrop.defaultStroke"
         static let dragAndDropActivityMode = "settings.live.dragAndDrop.mode"
@@ -78,12 +79,16 @@ enum GeneralSettingsStorage {
         static let fileConverterAudioQuality = "settings.fileConverter.audioQuality"
         static let timerLiveActivityEnabled = "settings.live.timer"
         static let timerDefaultStrokeEnabled = "settings.live.timer.defaultStroke"
+        static let timerSoundEnabled = "settings.timer.soundEnabled"
+        static let timerSound = "settings.timer.sound"
         static let screenRecordingLiveActivityEnabled = "settings.live.screenRecording"
         static let screenRecordingDefaultStrokeEnabled = "settings.live.screenRecording.defaultStroke"
         static let screenshotActivityEnabled = "settings.live.screenshot"
         static let screenshotDisableSystemThumbnail = "settings.screenshot.disableSystemThumbnail"
         static let screenshotTemporaryActivityDuration = "settings.temporary.screenshot.duration"
         static let screenshotAutoHideEnabled = "settings.screenshot.autoHideEnabled"
+        static let screenshotSavePath = "settings.screenshot.savePath"
+        static let screenRecordingSavePath = "settings.screenRecording.savePath"
         static let legacyFileTransfersLiveActivityEnabled = "settings.live.fileTransfers"
         static let chargerTemporaryActivityEnabled = "settings.temporary.charger"
         static let lowPowerTemporaryActivityEnabled = "settings.temporary.lowPower"
@@ -127,6 +132,15 @@ enum GeneralSettingsStorage {
         static let calendarHideWhenFocused = "settings.calendar.hideWhenFocused"
         static let calendarShowAllDay = "settings.calendar.showAllDay"
         static let calendarDaysToShow = "settings.calendar.daysToShow"
+        static let calendarNoticeMinutes = "settings.calendar.noticeMinutes"
+        static let calendarIncludedCalendarIDs = "settings.calendar.includedCalendarIDs"
+        static let calendarTimeDisplayFormat = "settings.calendar.timeDisplayFormat"
+        static let calendarOngoingEventHideMinutes = "settings.calendar.ongoingEventHideMinutes"
+        static let calendarPrivacyMode = "settings.calendar.privacy"
+        static let calendarSoundAlert = "settings.calendar.soundAlert"
+        static let appleMailNotificationsEnabled = "settings.notifications.appleMail.enabled"
+        static let appleMailNotificationDuration = "settings.notifications.appleMail.duration"
+        static let appleMailNotificationsPermissionPending = "appleMailNotificationsPermissionPending"
         static let homePageOrder = "settings.homePage.order"
         static let homePageDisabled = "settings.homePage.disabled"
         static let homePagePageIndicator = "settings.homePage.pageIndicator"
@@ -198,6 +212,7 @@ enum GeneralSettingsStorage {
         Keys.downloadsLiveActivityEnabled: true,
         Keys.downloadsDefaultStrokeEnabled: false,
         Keys.downloadsProgressIndicatorStyle: DownloadProgressIndicatorStyle.percent.rawValue,
+        Keys.dragAndDropLiveActivityEnabled: true,
         Keys.airDropLiveActivityEnabled: true,
         Keys.airDropDefaultStrokeEnabled: false,
         Keys.dragAndDropActivityMode: DragAndDropActivityMode.combined.rawValue,
@@ -215,12 +230,16 @@ enum GeneralSettingsStorage {
         Keys.fileTrayRemoveButtonHidden: false,
         Keys.timerLiveActivityEnabled: true,
         Keys.timerDefaultStrokeEnabled: false,
+        Keys.timerSoundEnabled: true,
+        Keys.timerSound: TimerSound.radar.rawValue,
         Keys.screenRecordingLiveActivityEnabled: true,
         Keys.screenRecordingDefaultStrokeEnabled: false,
         Keys.screenshotActivityEnabled: true,
         Keys.screenshotDisableSystemThumbnail: true,
         Keys.screenshotTemporaryActivityDuration: 4,
         Keys.screenshotAutoHideEnabled: true,
+        Keys.screenshotSavePath: "",
+        Keys.screenRecordingSavePath: "",
         LockScreenSettings.liveActivityKey: true,
         LockScreenSettings.soundKey: true,
         LockScreenSettings.customSoundPathKey: "",
@@ -232,7 +251,7 @@ enum GeneralSettingsStorage {
         LockScreenSettings.widgetTintStyleKey: LockScreenWidgetTintStyle.neutral.rawValue,
         LockScreenSettings.widgetBackgroundBrightnessKey: 1.0,
         LockScreenSettings.liquidGlassVariantKey: 8,
-        LockScreenSettings.mediaPanelBackgroundStyleKey: LockScreenMediaPanelBackgroundStyle.animatedArtwork.rawValue,
+        LockScreenSettings.mediaPanelBackgroundStyleKey: LockScreenMediaPanelBackgroundStyle.staticArtwork.rawValue,
         LockScreenSettings.lyricsEnabledKey: true,
         LockScreenSettings.mediaPanelVerticalOffsetKey: 0.0,
         Keys.chargerTemporaryActivityEnabled: true,
@@ -283,6 +302,15 @@ enum GeneralSettingsStorage {
         Keys.calendarLiveActivity: true,
         Keys.calendarHideWhenFocused: true,
         Keys.calendarShowAllDay: true,
-        Keys.calendarDaysToShow: 7
+        Keys.calendarDaysToShow: 7,
+        Keys.calendarNoticeMinutes: 15,
+        Keys.calendarIncludedCalendarIDs: [String](),
+        Keys.calendarTimeDisplayFormat: CalendarTimeDisplayFormat.exact.rawValue,
+        Keys.calendarOngoingEventHideMinutes: 0,
+        Keys.calendarPrivacyMode: false,
+        Keys.calendarSoundAlert: false,
+        Keys.appleMailNotificationsEnabled: false,
+        Keys.appleMailNotificationDuration: 5,
+        Keys.appleMailNotificationsPermissionPending: false
     ]
 }

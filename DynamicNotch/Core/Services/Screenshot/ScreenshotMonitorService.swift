@@ -5,6 +5,9 @@ import Combine
 final class ScreenshotMonitorService {
     var onScreenshotCaptured: ((NSImage, URL?, String) -> Void)?
     
+    private(set) var userTargetDirectoryURL: URL = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask).first ?? URL(fileURLWithPath: NSHomeDirectory())
+    
+    private var originalScreenshotLocation: String?
     private var fileWatcherTimer: Timer?
     private var pasteboardTimer: Timer?
     private var lastPasteboardChangeCount: Int = 0
@@ -24,6 +27,14 @@ final class ScreenshotMonitorService {
     func startMonitoring(disableSystemThumbnail: Bool = true) {
         guard !isMonitoring else { return }
         isMonitoring = true
+        
+        self.originalScreenshotLocation = Self.getSystemScreenshotLocation()
+        self.userTargetDirectoryURL = computeUserTargetDirectoryURL()
+        
+        let stagingDir = rawStagingDirectoryURL()
+        try? fileManager.createDirectory(at: stagingDir, withIntermediateDirectories: true)
+        
+        Self.setSystemScreenshotLocation(stagingDir.path)
         
         if disableSystemThumbnail {
             Self.setSystemFloatingThumbnailEnabled(false)
@@ -47,6 +58,8 @@ final class ScreenshotMonitorService {
         fileWatcherTimer = nil
         pasteboardTimer?.invalidate()
         pasteboardTimer = nil
+        
+        Self.setSystemScreenshotLocation(originalScreenshotLocation)
     }
     
     func updateLastPasteboardChangeCount() {
@@ -56,31 +69,68 @@ final class ScreenshotMonitorService {
     func suppressMonitoring(for duration: TimeInterval = 3.0) {
         suppressMonitoringUntil = Date().addingTimeInterval(duration)
         updateLastPasteboardChangeCount()
-        primeBaseline()
     }
     
-    private func screenshotDirectoryURL() -> URL {
-        if let customLocation = UserDefaults(suiteName: "com.apple.screencapture")?.string(forKey: "location") {
-            let expanded = (customLocation as NSString).expandingTildeInPath
+    func rawStagingDirectoryURL() -> URL {
+        let caches = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first ?? fileManager.temporaryDirectory
+        return caches.appendingPathComponent("com.Jackson.DynamicNotch/RawScreenshots")
+    }
+    
+    private func computeUserTargetDirectoryURL() -> URL {
+        if let customPath = UserDefaults.standard.string(forKey: "settings.screenshot.savePath"), !customPath.isEmpty {
+            let expanded = (customPath as NSString).expandingTildeInPath
             return URL(fileURLWithPath: expanded)
         }
-        return fileManager.urls(for: .desktopDirectory, in: .userDomainMask).first ?? URL(fileURLWithPath: NSHomeDirectory())
+        let desktop = fileManager.urls(for: .desktopDirectory, in: .userDomainMask).first ?? URL(fileURLWithPath: NSHomeDirectory())
+        guard let original = originalScreenshotLocation, !original.isEmpty else {
+            return desktop
+        }
+        let expanded = (original as NSString).expandingTildeInPath
+        if expanded.contains("com.Jackson.DynamicNotch") || expanded.contains("RawScreenshots") {
+            return desktop
+        }
+        return URL(fileURLWithPath: expanded)
+    }
+    
+    private func computeScreenRecordingTargetDirectoryURL() -> URL {
+        if let customPath = UserDefaults.standard.string(forKey: "settings.screenRecording.savePath"), !customPath.isEmpty {
+            let expanded = (customPath as NSString).expandingTildeInPath
+            return URL(fileURLWithPath: expanded)
+        }
+        return computeUserTargetDirectoryURL()
+    }
+    
+    private func uniqueURL(for targetURL: URL) -> URL {
+        guard fileManager.fileExists(atPath: targetURL.path) else { return targetURL }
+        
+        let dir = targetURL.deletingLastPathComponent()
+        let ext = targetURL.pathExtension
+        let baseName = targetURL.deletingPathExtension().lastPathComponent
+        
+        var counter = 1
+        var candidateURL = targetURL
+        while fileManager.fileExists(atPath: candidateURL.path) {
+            let newName = ext.isEmpty ? "\(baseName) (\(counter))" : "\(baseName) (\(counter)).\(ext)"
+            candidateURL = dir.appendingPathComponent(newName)
+            counter += 1
+        }
+        return candidateURL
     }
     
     private func primeBaseline() {
-        let dir = screenshotDirectoryURL()
+        let dir = rawStagingDirectoryURL()
         if let urls = try? fileManager.contentsOfDirectory(at: dir, includingPropertiesForKeys: [.contentModificationDateKey], options: [.skipsHiddenFiles]) {
-            knownFilePaths = Set(urls.map { $0.path })
+            for url in urls {
+                let lower = url.lastPathComponent.lowercased()
+                if !lower.hasSuffix(".mov") && !lower.hasSuffix(".mp4") {
+                    knownFilePaths.insert(url.path)
+                }
+            }
         }
     }
     
     private func scanForNewScreenshots() {
-        if let suppressUntil = suppressMonitoringUntil, Date() < suppressUntil {
-            primeBaseline()
-            return
-        }
-        
-        let dir = screenshotDirectoryURL()
+        let dir = rawStagingDirectoryURL()
         guard let urls = try? fileManager.contentsOfDirectory(
             at: dir,
             includingPropertiesForKeys: [.contentModificationDateKey, .isRegularFileKey],
@@ -91,20 +141,40 @@ final class ScreenshotMonitorService {
         for url in urls {
             let path = url.path
             guard !knownFilePaths.contains(path) else { continue }
-            knownFilePaths.insert(path)
-            
-            guard let resourceValues = try? url.resourceValues(forKeys: [.contentModificationDateKey, .isRegularFileKey]),
-                  resourceValues.isRegularFile == true,
-                  let modDate = resourceValues.contentModificationDate,
-                  now.timeIntervalSince(modDate) < 5.0 else {
-                continue
-            }
             
             let filename = url.lastPathComponent
             let lower = filename.lowercased()
             
+            if lower.hasSuffix(".mov") || lower.hasSuffix(".mp4") || lower.contains("screen recording") || lower.contains("запись экрана") {
+                guard let resourceValues = try? url.resourceValues(forKeys: [.isRegularFileKey]),
+                      resourceValues.isRegularFile == true else { continue }
+                
+                let targetDir = computeScreenRecordingTargetDirectoryURL()
+                try? fileManager.createDirectory(at: targetDir, withIntermediateDirectories: true)
+                let destinationURL = uniqueURL(for: targetDir.appendingPathComponent(filename))
+                do {
+                    try fileManager.moveItem(at: url, to: destinationURL)
+                    knownFilePaths.insert(path)
+                    knownFilePaths.insert(destinationURL.path)
+                } catch {
+                    // File might be currently open/being written by screencapture, try again on next timer tick
+                }
+                continue
+            }
+            
+            guard let resourceValues = try? url.resourceValues(forKeys: [.contentModificationDateKey, .isRegularFileKey]),
+                  resourceValues.isRegularFile == true,
+                  let modDate = resourceValues.contentModificationDate,
+                  now.timeIntervalSince(modDate) < 10.0 else {
+                knownFilePaths.insert(path)
+                continue
+            }
+            
             if lower.contains("screenshot") || lower.contains("скриншот") || lower.hasSuffix(".png") || lower.hasSuffix(".jpg") {
                 if let image = NSImage(contentsOf: url) {
+                    knownFilePaths.insert(path)
+                    updateLastPasteboardChangeCount()
+                    suppressMonitoring(for: 1.5)
                     DispatchQueue.main.async { [weak self] in
                         self?.onScreenshotCaptured?(image, url, filename)
                     }
@@ -135,11 +205,38 @@ final class ScreenshotMonitorService {
         }
     }
     
+    func markPathAsKnown(_ path: String) {
+        knownFilePaths.insert(path)
+    }
+    
     /// Configures system preference to hide or show the default floating screenshot thumbnail in the bottom-right corner of macOS.
     static func setSystemFloatingThumbnailEnabled(_ enabled: Bool) {
         let key = "show-thumbnail" as CFString
         let domain = "com.apple.screencapture" as CFString
         CFPreferencesSetValue(key, enabled as CFBoolean, domain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost)
         CFPreferencesAppSynchronize(domain)
+    }
+    
+    static func getSystemScreenshotLocation() -> String? {
+        let key = "location" as CFString
+        let domain = "com.apple.screencapture" as CFString
+        return CFPreferencesCopyAppValue(key, domain) as? String
+    }
+    
+    static func setSystemScreenshotLocation(_ path: String?) {
+        let key = "location" as CFString
+        let domain = "com.apple.screencapture" as CFString
+        if let path = path {
+            let expanded = (path as NSString).expandingTildeInPath
+            CFPreferencesSetValue(key, expanded as CFString, domain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost)
+        } else {
+            CFPreferencesSetValue(key, nil, domain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost)
+        }
+        CFPreferencesAppSynchronize(domain)
+        
+        let task = Process()
+        task.launchPath = "/usr/bin/killall"
+        task.arguments = ["SystemUIServer"]
+        try? task.run()
     }
 }

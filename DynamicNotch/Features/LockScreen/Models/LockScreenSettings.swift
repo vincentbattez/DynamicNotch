@@ -14,6 +14,7 @@ enum LockScreenSettings {
     static let liquidGlassVariantKey = "settings.lockScreen.liquidGlassVariant"
     static let mediaPanelBackgroundStyleKey = "settings.lockScreen.mediaPanelBackgroundStyle"
     static let lyricsEnabledKey = "settings.lockScreen.lyricsEnabled"
+    static let artworkExpandedKey = "settings.lockScreen.isArtworkExpanded"
     static let widgetBackgroundBrightnessRange = 0.75...1.25
     static let liquidGlassVariantRange = 0...19
     static let mediaPanelVerticalOffsetKey = "settings.lockScreen.mediaPanelVerticalOffset"
@@ -101,13 +102,17 @@ enum LockScreenSettings {
             let rawValue = defaults.string(forKey: mediaPanelBackgroundStyleKey),
             let style = LockScreenMediaPanelBackgroundStyle(rawValue: rawValue)
         else {
-            return .animatedArtwork
+            return .staticArtwork
         }
         return style
     }
 
     static func isLyricsEnabled(in defaults: UserDefaults = .standard) -> Bool {
         resolvedBoolean(forKey: lyricsEnabledKey, defaultValue: true, in: defaults)
+    }
+
+    static func isArtworkExpanded(in defaults: UserDefaults = .standard) -> Bool {
+        resolvedBoolean(forKey: artworkExpandedKey, defaultValue: false, in: defaults)
     }
 
     static func mediaPanelVerticalOffset(in defaults: UserDefaults = .standard) -> Double {

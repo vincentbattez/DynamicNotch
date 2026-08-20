@@ -15,7 +15,37 @@ private struct SettingsSectionDescriptor {
     let systemImage: String
     let imageName: String?
     let tint: Color
+    let iconColor: Color?
+    let stroke: Bool?
     let resetGroup: SettingsViewModel.ResetGroup?
+
+    init(
+        sidebarGroup: SettingsRootViewModel.SidebarGroup,
+        titleKey: String,
+        fallbackTitle: String,
+        subtitleKey: String,
+        fallbackSubtitle: String,
+        searchKeywords: [String],
+        systemImage: String,
+        imageName: String?,
+        tint: Color,
+        iconColor: Color? = nil,
+        stroke: Bool? = nil,
+        resetGroup: SettingsViewModel.ResetGroup?
+    ) {
+        self.sidebarGroup = sidebarGroup
+        self.titleKey = titleKey
+        self.fallbackTitle = fallbackTitle
+        self.subtitleKey = subtitleKey
+        self.fallbackSubtitle = fallbackSubtitle
+        self.searchKeywords = searchKeywords
+        self.systemImage = systemImage
+        self.imageName = imageName
+        self.tint = tint
+        self.iconColor = iconColor
+        self.stroke = stroke
+        self.resetGroup = resetGroup
+    }
 }
 
 extension SettingsRootViewModel {
@@ -43,23 +73,25 @@ extension SettingsRootViewModel {
     enum Section: String, CaseIterable, Identifiable {
         case general
         case homePage
+        #if DEBUG
+        case debug
+        #endif
     
         case wifi
         case bluetooth
         case vpn
-        case battery
         case focus
+        case battery
         
         case nowPlaying
         case downloads
         case drop
         
+        case notifications
         case hud
-        case timer
         case calendar
         case screenRecording
         case lockScreen
-        case notifications
 
         var id: String { rawValue }
 
@@ -97,6 +129,14 @@ extension SettingsRootViewModel {
 
         var tint: Color {
             descriptor.tint
+        }
+
+        var iconColor: Color {
+            descriptor.iconColor ?? .white
+        }
+
+        var stroke: Bool {
+            descriptor.stroke ?? false
         }
 
         var resetGroup: SettingsViewModel.ResetGroup? {
@@ -239,6 +279,28 @@ private enum SettingsSectionCatalog {
                 resetGroup: .homePage
             )
 
+        #if DEBUG
+        case .debug:
+            return .init(
+                sidebarGroup: .application,
+                titleKey: "settings.section.debug.title",
+                fallbackTitle: "Debug",
+                subtitleKey: "settings.section.debug.subtitle",
+                fallbackSubtitle: "Manual previews and event triggers for testing.",
+                searchKeywords: [
+                    "debug",
+                    "preview",
+                    "onboarding",
+                    "trigger",
+                    "testing"
+                ],
+                systemImage: "ladybug.fill",
+                imageName: nil,
+                tint: .red,
+                resetGroup: nil
+            )
+        #endif
+
             
         case .calendar:
             return .init(
@@ -251,10 +313,31 @@ private enum SettingsSectionCatalog {
                     "Calendar",
                     "Events"
                 ],
-                systemImage: "calendar",
+                systemImage: "29.calendar",
                 imageName: nil,
                 tint: .blue,
+                stroke: true,
                 resetGroup: .calendar
+            )
+            
+        case .notifications:
+            return .init(
+                sidebarGroup: .system,
+                titleKey: "settings.section.notifications.title",
+                fallbackTitle: "Notifications",
+                subtitleKey: "settings.section.notifications.subtitle",
+                fallbackSubtitle: "Configure notifications shown in the notch.",
+                searchKeywords: [
+                    "notifications",
+                    "mail",
+                    "apple mail",
+                    "email",
+                    "message"
+                ],
+                systemImage: "bell.badge.fill",
+                imageName: nil,
+                tint: .red,
+                resetGroup: .notifications
             )
 
         case .downloads:
@@ -298,28 +381,8 @@ private enum SettingsSectionCatalog {
                 ],
                 systemImage: "tray.and.arrow.down.fill",
                 imageName: nil,
-                tint: .black,
+                tint: .gray,
                 resetGroup: .drop
-            )
-
-        case .timer:
-            return .init(
-                sidebarGroup: .system,
-                titleKey: "settings.section.timer.title",
-                fallbackTitle: "Timer",
-                subtitleKey: "settings.section.timer.subtitle",
-                fallbackSubtitle: "Clock timer live activity and stroke appearance.",
-                searchKeywords: [
-                    "timer",
-                    "clock",
-                    "countdown",
-                    "live activity",
-                    "stroke"
-                ],
-                systemImage: "timer",
-                imageName: nil,
-                tint: .orange,
-                resetGroup: .timer
             )
 
         case .screenRecording:

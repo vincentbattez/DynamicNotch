@@ -24,8 +24,8 @@ struct SystemSettingsView: View {
     private var systemCard: some View {
         SettingsCard() {
             SettingsToggleRow(
-                title: "Launch at login",
-                description: "Launch Dynamic Notch automatically when you sign in.",
+                title: "settings.system.launchAtLogin.title",
+                description: "settings.system.launchAtLogin.desc",
                 systemImage: "power",
                 color: .red,
                 isOn: $applicationSettings.isLaunchAtLoginEnabled,
@@ -38,8 +38,8 @@ struct SystemSettingsView: View {
                 .frame(maxWidth: .infinity, alignment: .trailing)
             
             SettingsToggleRow(
-                title: "Show Dock icon",
-                description: "Keep the app visible in the Dock for faster switching and window access.",
+                title: "settings.system.dockIcon.title",
+                description: "settings.system.dockIcon.desc",
                 systemImage: "dock.rectangle",
                 color: .orange,
                 isOn: $applicationSettings.isDockIconVisible,
@@ -53,8 +53,8 @@ struct SystemSettingsView: View {
             
             VStack(alignment: .leading, spacing: 14) {
                 SettingsToggleRow(
-                    title: "Show menu bar icon",
-                    description: "Show a menu bar shortcut for quick access to Settings and Quit.",
+                    title: "settings.system.menuBarIcon.title",
+                    description: "settings.system.menuBarIcon.desc",
                     systemImage: "menubar.rectangle",
                     color: .blue,
                     isOn: $applicationSettings.isMenuBarIconVisible,
@@ -66,7 +66,7 @@ struct SystemSettingsView: View {
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundStyle(Color.yellow)
 
-                        Text("You can access the menu by right-clicking on the notch area.")
+                        Text(LocalizedStringKey("settings.system.menuBarIcon.warning"))
                             .font(.system(size: 10))
                             .foregroundStyle(Color.secondary)
                     }

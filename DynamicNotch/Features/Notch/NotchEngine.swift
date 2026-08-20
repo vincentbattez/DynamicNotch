@@ -54,12 +54,11 @@ final class NotchEngine: ObservableObject {
     }
 
     var canExpandActiveLiveActivity: Bool {
-        guard notchModel.temporaryNotificationContent == nil else { return false }
-        guard let liveActivityContent = notchModel.liveActivityContent else { return false }
+        guard let content = notchModel.content else { return false }
 
         return !notchModel.isLiveActivityExpanded &&
-        liveActivityContent.isExpandable &&
-        liveActivityContent.expandsOnTap
+        content.isExpandable &&
+        content.expandsOnTap
     }
 
     var canRestoreDismissedContent: Bool {
@@ -151,7 +150,8 @@ final class NotchEngine: ObservableObject {
     }
 
     func hideTemporaryNotification() {
-        guard notchModel.temporaryNotificationContent != nil else { return }
+        guard notchModel.temporaryNotificationContent != nil,
+              !notchModel.isLiveActivityExpanded else { return }
 
         cancelTemporary()
         let contentToRestore = highestPriorityVisibleActivity
@@ -174,18 +174,24 @@ final class NotchEngine: ObservableObject {
 
     func dismissActiveContent() {
         if let temporaryContent = notchModel.temporaryNotificationContent {
-            lastDismissedContent = .temporary(
-                temporaryContent,
-                duration: currentTemporaryNotificationDuration ?? .infinity
-            )
+            if temporaryContent.isRestorable {
+                lastDismissedContent = .temporary(
+                    temporaryContent,
+                    duration: currentTemporaryNotificationDuration ?? .infinity
+                )
+            }
             hideTemporaryNotification()
             return
         }
 
         guard let liveActivityContent = notchModel.liveActivityContent else { return }
-        lastDismissedContent = .live(liveActivityContent)
-        recordDismissedLiveActivity(id: liveActivityContent.id)
-        send(.dismissLiveActivity(id: liveActivityContent.id))
+        if liveActivityContent.isRestorable {
+            lastDismissedContent = .live(liveActivityContent)
+            recordDismissedLiveActivity(id: liveActivityContent.id)
+            send(.dismissLiveActivity(id: liveActivityContent.id))
+        } else {
+            send(.hideLiveActivity(id: liveActivityContent.id))
+        }
     }
 
     func restoreDismissedContent() {
@@ -244,6 +250,10 @@ final class NotchEngine: ObservableObject {
     func handleActiveContentTap() {
         guard canExpandActiveLiveActivity else { return }
 
+        if notchModel.temporaryNotificationContent != nil {
+            cancelTemporary()
+        }
+
         withAnimation(animations.expandLiveActivity) {
             notchModel.isLiveActivityExpanded = true
         }
@@ -253,9 +263,31 @@ final class NotchEngine: ObservableObject {
         if UserDefaults.standard.bool(forKey: "isNotchLocked") {
             return
         }
-        
-        guard notchModel.isLiveActivityExpanded,
-              let liveActivityContent = notchModel.liveActivityContent else { return }
+
+        guard notchModel.isLiveActivityExpanded else { return }
+
+        if let temporaryContent = notchModel.temporaryNotificationContent {
+            let duration = currentTemporaryNotificationDuration
+            transition(
+                hide: {
+                    withAnimation(self.animations.closeLiveActivity) {
+                        self.notchModel.isLiveActivityExpanded = false
+                        self.notchModel.temporaryNotificationContent = nil
+                    }
+                },
+                show: {
+                    withAnimation(self.animations.contentShow) {
+                        self.notchModel.temporaryNotificationContent = temporaryContent
+                    }
+                    if let duration, !duration.isInfinite {
+                        self.restartTemporaryTimer(duration: duration)
+                    }
+                }
+            )
+            return
+        }
+
+        guard let liveActivityContent = notchModel.liveActivityContent else { return }
 
         transition(
             hide: {
@@ -371,7 +403,9 @@ final class NotchEngine: ObservableObject {
                     notchModel.temporaryNotificationContent = content
                     notchModel.updateToken = UUID()
                 }
-                restartTemporaryTimer(duration: duration)
+                if !notchModel.isLiveActivityExpanded {
+                    restartTemporaryTimer(duration: duration)
+                }
             } else {
                 await showTemporaryTransition(content, duration: duration)
             }
@@ -506,6 +540,7 @@ final class NotchEngine: ObservableObject {
     private func restartTemporaryTimer(duration: TimeInterval) {
         cancelTemporary()
 
+        guard !notchModel.isLiveActivityExpanded else { return }
         if duration.isInfinite { return }
 
         let timerID = UUID()
@@ -515,7 +550,8 @@ final class NotchEngine: ObservableObject {
             try? await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
 
             await MainActor.run {
-                guard self.temporaryTimerID == timerID else { return }
+                guard self.temporaryTimerID == timerID,
+                      !self.notchModel.isLiveActivityExpanded else { return }
                 self.hideTemporaryNotification()
             }
         }

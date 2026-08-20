@@ -109,9 +109,10 @@ final class NotchEventCoordinatorIntegrationTests: XCTestCase {
 
         context.coordinator.handleHudEvent(.volume(72))
 
-        try? await Task.sleep(for: .milliseconds(100))
-        await MainActor.run {
-            XCTAssertNil(context.notchViewModel.notchModel.temporaryNotificationContent)
+        await assertEventually {
+            await MainActor.run {
+                context.notchViewModel.notchModel.temporaryNotificationContent?.id == NotchContentRegistry.HUD.system.id
+            }
         }
     }
 
@@ -127,9 +128,10 @@ final class NotchEventCoordinatorIntegrationTests: XCTestCase {
 
         context.coordinator.handlePowerEvent(.charger)
 
-        try? await Task.sleep(for: .milliseconds(100))
-        await MainActor.run {
-            XCTAssertNil(context.notchViewModel.notchModel.temporaryNotificationContent)
+        await assertEventually {
+            await MainActor.run {
+                context.notchViewModel.notchModel.temporaryNotificationContent?.id == NotchContentRegistry.Power.charger.id
+            }
         }
     }
 
@@ -397,6 +399,65 @@ final class NotchEventCoordinatorIntegrationTests: XCTestCase {
         }
     }
 
+    func testLiveActivitiesSuppressedOnLockScreenExceptLockScreenActivityAndTemporaryNotification() async {
+        let context = makeContext(temporaryActivityDurationScale: 0.2)
+        context.nowPlayingService.publish(makeNowPlayingSnapshot())
+        context.coordinator.handleNowPlayingEvent(context.nowPlayingViewModel.event ?? .started)
+
+        await assertEventually {
+            await MainActor.run { context.notchViewModel.displayedContent?.id == NotchContentRegistry.Media.nowPlaying.id }
+        }
+
+        context.lockScreenService.publish(isLocked: true)
+
+        await assertEventually {
+            await MainActor.run { context.notchViewModel.displayedContent?.id == NotchContentRegistry.LockScreen.activity.id }
+        }
+
+        context.coordinator.handleHudEvent(.volume(80))
+
+        await assertEventually {
+            await MainActor.run { context.notchViewModel.displayedContent?.id == NotchContentRegistry.HUD.system.id }
+        }
+
+        await assertEventually(timeout: 1.5) {
+            await MainActor.run { context.notchViewModel.displayedContent?.id == NotchContentRegistry.LockScreen.activity.id }
+        }
+
+        context.lockScreenService.publish(isLocked: false)
+
+        await assertEventually(timeout: 0.5) {
+            await MainActor.run { context.notchViewModel.displayedContent?.id == NotchContentRegistry.Media.nowPlaying.id }
+        }
+    }
+
+    func testSwipeDismissOnLockScreenDoesNotDismissContent() async {
+        let context = makeContext()
+        context.nowPlayingService.publish(makeNowPlayingSnapshot())
+        context.coordinator.handleNowPlayingEvent(context.nowPlayingViewModel.event ?? .started)
+
+        context.lockScreenService.publish(isLocked: true)
+
+        await assertEventually {
+            await MainActor.run {
+                context.notchViewModel.isLocked &&
+                context.notchViewModel.displayedContent?.id == NotchContentRegistry.LockScreen.activity.id &&
+                context.notchViewModel.canDismissWithTrackpadSwipe
+            }
+        }
+
+        await MainActor.run {
+            context.notchViewModel.dismissActiveContent()
+        }
+
+        try? await Task.sleep(nanoseconds: 100_000_000)
+        await assertEventually {
+            await MainActor.run {
+                context.notchViewModel.displayedContent?.id == NotchContentRegistry.LockScreen.activity.id
+            }
+        }
+    }
+
     func testCheckFirstLaunchSyncsActiveNowPlayingSessionWhenOnboardingIsAlreadyCompleted() async {
         UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
 
@@ -466,6 +527,7 @@ private extension NotchEventCoordinatorIntegrationTests {
         let lockScreenManager: LockScreenManager
         let lockScreenService: FakeLockScreenMonitoringService
         let cancellables: Set<AnyCancellable>
+        let mailManager: MailManager
     }
 
     func makeContext(
@@ -495,7 +557,7 @@ private extension NotchEventCoordinatorIntegrationTests {
         UserDefaults.standard.set(nowPlayingPauseHideTimerEnabled, forKey: "settings.nowPlaying.pauseHideTimerEnabled")
         UserDefaults.standard.set(nowPlayingPauseHideDelay, forKey: "settings.nowPlaying.pauseHideDelay")
         UserDefaults.standard.set(true, forKey: "settings.live.downloads")
-        UserDefaults.standard.set(dragAndDropEnabled, forKey: "settings.live.airDrop")
+        UserDefaults.standard.set(dragAndDropEnabled, forKey: "settings.live.dragAndDrop")
         UserDefaults.standard.set(dragAndDropActivityMode.rawValue, forKey: "settings.live.dragAndDrop.mode")
         UserDefaults.standard.set(trayLiveActivityEnabled, forKey: "settings.live.tray")
         UserDefaults.standard.set(true, forKey: "settings.live.fileConverter")
@@ -547,6 +609,7 @@ private extension NotchEventCoordinatorIntegrationTests {
             monitor: FakeNotificationInboxMonitor(),
             defaults: UserDefaults(suiteName: UUID().uuidString)!
         )
+        let mailManager = MailManager()
         let calendarViewModel = CalendarViewModel()
         let coordinator = NotchEventCoordinator(
             notchViewModel: notchViewModel,
@@ -566,7 +629,8 @@ private extension NotchEventCoordinatorIntegrationTests {
             homePageViewModel: homePageViewModel,
             localTimerViewModel: localTimerViewModel,
             notificationCenterViewModel: notificationCenterViewModel,
-            calendarViewModel: calendarViewModel
+            calendarViewModel: calendarViewModel,
+            mailManager: mailManager
         )
         var cancellables = Set<AnyCancellable>()
 
@@ -596,7 +660,8 @@ private extension NotchEventCoordinatorIntegrationTests {
             nowPlayingService: nowPlayingService,
             lockScreenManager: lockScreenManager,
             lockScreenService: lockScreenService,
-            cancellables: cancellables
+            cancellables: cancellables,
+            mailManager: mailManager
         )
     }
 }

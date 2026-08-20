@@ -34,12 +34,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var lockScreenLiveActivityWindowManager: LockScreenLiveActivityWindowManager { container.lockScreenLiveActivityWindowManager }
     var homePageViewModel: HomePageViewModel { container.homePageViewModel }
     var notificationCenterViewModel: NotificationCenterViewModel { container.notificationCenterViewModel }
+    var mailManager: MailManager { container.mailManager }
 
     var window: OverlayPanelWindow!
     var localClickMonitor: Any?
     let globalClickMonitor = GlobalClickMonitor()
     var cancellables = Set<AnyCancellable>()
     var isPrimaryWindowSuspendedForLock = false
+    var expansionTime: Date = .distantPast
     
     override init() {
         let isRunningUITests = ProcessInfo.processInfo.arguments.contains("-ui-testing")
@@ -65,6 +67,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             createNotchWindow()
             observeOutsideClickDismissal()
             _ = lockScreenPanelManager
+            _ = lockScreenLiveActivityWindowManager
             hardwareHUDMonitor.startMonitoring()
 
             NotificationCenter.default.addObserver(
@@ -126,8 +129,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         container.commandMonitor.stopMonitoring()
         if !isRunningUITests {
             lockScreenPanelManager.invalidate()
+            lockScreenLiveActivityWindowManager.invalidate()
         }
         stopOutsideClickMonitoring()
+        mailManager.stopMonitoring()
     }
 
     func applyActivationPolicy(showsDockIcon: Bool) {

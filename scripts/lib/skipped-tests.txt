@@ -6,3 +6,8 @@ DynamicNotchTests/NotchViewModelIntegrationTests/testDismissSwipeCompressesColla
 DynamicNotchTests/NotchViewModelIntegrationTests/testPresentedNotchSizeStagesHeightDuringClosingTransition
 DynamicNotchTests/NotchViewModelIntegrationTests/testUpdateDimensionsUsesSelectedDisplayMetrics
 DynamicNotchTests/NotchViewModelIntegrationTests/testUpdateDimensionsUsesSpecificDisplayMetrics
+
+# Upstream defect (fails on pristine upstream/main too, merged 2026-08-20):
+# swipe-dismiss stays allowed on the lock screen after upstream switched
+# `canDismissWithTrackpadSwipe` to `displayedContent`.
+DynamicNotchTests/NotchEventCoordinatorIntegrationTests/testSwipeDismissOnLockScreenDoesNotDismissContent
