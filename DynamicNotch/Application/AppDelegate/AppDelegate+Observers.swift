@@ -130,6 +130,9 @@ extension AppDelegate {
                 interceptVolume: isVolumeHUDEnabled,
                 interceptBrightness: isBrightnessHUDEnabled
             )
+            // The tap is only created once a HUD is on, so enabling one here has
+            // to engage it — startMonitoring() is a no-op when already running.
+            self?.hardwareHUDMonitor.startMonitoring()
         }
         .store(in: &cancellables)
     }

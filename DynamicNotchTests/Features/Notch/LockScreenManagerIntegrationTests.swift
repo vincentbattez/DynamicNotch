@@ -3,9 +3,21 @@ import XCTest
 
 @MainActor
 final class LockScreenManagerIntegrationTests: XCTestCase {
+    // Scratch domain: these tests run app-hosted, so writing to .standard would leak into the real app prefs.
+    private var scratchSuiteName: String!
+    private var scratchDefaults: UserDefaults!
+
+    override func setUp() {
+        super.setUp()
+        scratchSuiteName = "DynamicNotchTests.\(UUID().uuidString)"
+        scratchDefaults = UserDefaults(suiteName: scratchSuiteName)
+    }
+
     override func tearDown() {
+        UserDefaults.standard.removePersistentDomain(forName: scratchSuiteName)
+        scratchDefaults = nil
+        scratchSuiteName = nil
         super.tearDown()
-        UserDefaults.standard.removeObject(forKey: LockScreenSettings.soundKey)
     }
 
     func testLockAndUnlockTransitionsPlayExpectedSounds() async {
@@ -14,6 +26,7 @@ final class LockScreenManagerIntegrationTests: XCTestCase {
         let manager = LockScreenManager(
             service: service,
             soundPlayer: soundPlayer,
+            defaults: scratchDefaults,
             unlockCollapseDelay: 0.05,
             idleResetDelay: 0.05
         )
@@ -41,13 +54,14 @@ final class LockScreenManagerIntegrationTests: XCTestCase {
     }
 
     func testLockAndUnlockTransitionsDoNotPlaySoundsWhenDisabled() async {
-        UserDefaults.standard.set(false, forKey: LockScreenSettings.soundKey)
+        scratchDefaults.set(false, forKey: LockScreenSettings.soundKey)
 
         let service = FakeLockScreenMonitoringService()
         let soundPlayer = FakeLockScreenSoundPlayer()
         let manager = LockScreenManager(
             service: service,
             soundPlayer: soundPlayer,
+            defaults: scratchDefaults,
             unlockCollapseDelay: 0.05,
             idleResetDelay: 0.05
         )

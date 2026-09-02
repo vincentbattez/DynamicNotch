@@ -59,6 +59,12 @@ final class HardwareHUDMonitor {
         // regardless of whether the media-key tap succeeds.
         updateAudioChangeObservation()
 
+        // The media-key tap needs Accessibility, so don't create it — and don't
+        // raise the permission prompt — until a HUD is actually turned on.
+        guard mediaKeyTap.configuration.interceptsAnyMediaKey else {
+            return
+        }
+
         guard !isMonitoring else {
             return
         }

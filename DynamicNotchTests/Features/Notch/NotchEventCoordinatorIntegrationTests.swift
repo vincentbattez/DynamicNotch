@@ -5,6 +5,32 @@ import XCTest
 
 @MainActor
 final class NotchEventCoordinatorIntegrationTests: XCTestCase {
+    // Scratch domain: these tests run app-hosted, so writing to .standard would leak into the real app prefs.
+    private var scratchSuiteName: String!
+    private var scratchDefaults: UserDefaults!
+    private var previousHasSeenOnboarding: Any?
+
+    override func setUp() {
+        super.setUp()
+        scratchSuiteName = "DynamicNotchTests.\(UUID().uuidString)"
+        scratchDefaults = UserDefaults(suiteName: scratchSuiteName)
+        previousHasSeenOnboarding = UserDefaults.standard.object(forKey: "hasSeenOnboarding")
+    }
+
+    override func tearDown() {
+        // `hasSeenOnboarding` is read from .standard directly by the coordinator, so restore it.
+        if let previousHasSeenOnboarding {
+            UserDefaults.standard.set(previousHasSeenOnboarding, forKey: "hasSeenOnboarding")
+        } else {
+            UserDefaults.standard.removeObject(forKey: "hasSeenOnboarding")
+        }
+        previousHasSeenOnboarding = nil
+        UserDefaults.standard.removePersistentDomain(forName: scratchSuiteName)
+        scratchDefaults = nil
+        scratchSuiteName = nil
+        super.tearDown()
+    }
+
     func testOnboardingBlocksPowerNotifications() async {
         let context = makeContext()
 
@@ -543,38 +569,38 @@ private extension NotchEventCoordinatorIntegrationTests {
         noInternetTemporaryActivityEnabled: Bool = true,
         homePageLiveActivityEnabled: Bool = false
     ) -> TestContext {
-        UserDefaults.standard.set(false, forKey: "isLaunchAtLoginEnabled")
-        UserDefaults.standard.set(0, forKey: "notchWidth")
-        UserDefaults.standard.set(0, forKey: "notchHeight")
-        UserDefaults.standard.set(brightnessHUDEnabled, forKey: "settings.hud.brightness")
-        UserDefaults.standard.set(keyboardHUDEnabled, forKey: "settings.hud.keyboard")
-        UserDefaults.standard.set(volumeHUDEnabled, forKey: "settings.hud.volume")
-        UserDefaults.standard.set(HudStyle.standard.rawValue, forKey: "settings.hud.style")
-        UserDefaults.standard.set(temporaryActivityDurationScale, forKey: "settings.temporary.durationScale")
-        UserDefaults.standard.set(true, forKey: "settings.live.hotspot")
-        UserDefaults.standard.set(true, forKey: "settings.live.focus")
-        UserDefaults.standard.set(true, forKey: "settings.live.nowPlaying")
-        UserDefaults.standard.set(nowPlayingPauseHideTimerEnabled, forKey: "settings.nowPlaying.pauseHideTimerEnabled")
-        UserDefaults.standard.set(nowPlayingPauseHideDelay, forKey: "settings.nowPlaying.pauseHideDelay")
-        UserDefaults.standard.set(true, forKey: "settings.live.downloads")
-        UserDefaults.standard.set(dragAndDropEnabled, forKey: "settings.live.dragAndDrop")
-        UserDefaults.standard.set(dragAndDropActivityMode.rawValue, forKey: "settings.live.dragAndDrop.mode")
-        UserDefaults.standard.set(trayLiveActivityEnabled, forKey: "settings.live.tray")
-        UserDefaults.standard.set(true, forKey: "settings.live.fileConverter")
-        UserDefaults.standard.set(true, forKey: LockScreenSettings.liveActivityKey)
-        UserDefaults.standard.set(true, forKey: LockScreenSettings.mediaPanelKey)
-        UserDefaults.standard.set(true, forKey: "settings.temporary.charger")
-        UserDefaults.standard.set(true, forKey: "settings.temporary.lowPower")
-        UserDefaults.standard.set(true, forKey: "settings.temporary.fullPower")
-        UserDefaults.standard.set(true, forKey: "settings.temporary.bluetooth")
-        UserDefaults.standard.set(true, forKey: "settings.temporary.wifi")
-        UserDefaults.standard.set(true, forKey: "settings.temporary.vpn")
-        UserDefaults.standard.set(noInternetTemporaryActivityEnabled, forKey: "settings.temporary.noInternet")
-        UserDefaults.standard.set(true, forKey: "settings.temporary.focusOff")
-        UserDefaults.standard.set(true, forKey: "settings.temporary.notchSize")
-        UserDefaults.standard.set(homePageLiveActivityEnabled, forKey: "settings.homePage.liveActivity")
+        scratchDefaults.set(false, forKey: "isLaunchAtLoginEnabled")
+        scratchDefaults.set(0, forKey: "notchWidth")
+        scratchDefaults.set(0, forKey: "notchHeight")
+        scratchDefaults.set(brightnessHUDEnabled, forKey: "settings.hud.brightness")
+        scratchDefaults.set(keyboardHUDEnabled, forKey: "settings.hud.keyboard")
+        scratchDefaults.set(volumeHUDEnabled, forKey: "settings.hud.volume")
+        scratchDefaults.set(HudStyle.standard.rawValue, forKey: "settings.hud.style")
+        scratchDefaults.set(temporaryActivityDurationScale, forKey: "settings.temporary.durationScale")
+        scratchDefaults.set(true, forKey: "settings.live.hotspot")
+        scratchDefaults.set(true, forKey: "settings.live.focus")
+        scratchDefaults.set(true, forKey: "settings.live.nowPlaying")
+        scratchDefaults.set(nowPlayingPauseHideTimerEnabled, forKey: "settings.nowPlaying.pauseHideTimerEnabled")
+        scratchDefaults.set(nowPlayingPauseHideDelay, forKey: "settings.nowPlaying.pauseHideDelay")
+        scratchDefaults.set(true, forKey: "settings.live.downloads")
+        scratchDefaults.set(dragAndDropEnabled, forKey: "settings.live.airDrop")
+        scratchDefaults.set(dragAndDropActivityMode.rawValue, forKey: "settings.live.dragAndDrop.mode")
+        scratchDefaults.set(trayLiveActivityEnabled, forKey: "settings.live.tray")
+        scratchDefaults.set(true, forKey: "settings.live.fileConverter")
+        scratchDefaults.set(true, forKey: LockScreenSettings.liveActivityKey)
+        scratchDefaults.set(true, forKey: LockScreenSettings.mediaPanelKey)
+        scratchDefaults.set(true, forKey: "settings.temporary.charger")
+        scratchDefaults.set(true, forKey: "settings.temporary.lowPower")
+        scratchDefaults.set(true, forKey: "settings.temporary.fullPower")
+        scratchDefaults.set(true, forKey: "settings.temporary.bluetooth")
+        scratchDefaults.set(true, forKey: "settings.temporary.wifi")
+        scratchDefaults.set(true, forKey: "settings.temporary.vpn")
+        scratchDefaults.set(noInternetTemporaryActivityEnabled, forKey: "settings.temporary.noInternet")
+        scratchDefaults.set(true, forKey: "settings.temporary.focusOff")
+        scratchDefaults.set(true, forKey: "settings.temporary.notchSize")
+        scratchDefaults.set(homePageLiveActivityEnabled, forKey: "settings.homePage.liveActivity")
 
-        let settingsViewModel = SettingsViewModel()
+        let settingsViewModel = SettingsViewModel(defaults: scratchDefaults)
         let notchViewModel = NotchViewModel(
             settings: settingsViewModel.application,
             hideDelay: 0.01,
@@ -593,6 +619,7 @@ private extension NotchEventCoordinatorIntegrationTests {
         let timerViewModel = TimerViewModel(monitor: ClockTimerMonitor())
         let lockScreenManager = LockScreenManager(
             service: lockScreenService,
+            defaults: scratchDefaults,
             unlockCollapseDelay: 0.05,
             idleResetDelay: 0.05
         )

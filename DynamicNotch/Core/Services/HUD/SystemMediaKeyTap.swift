@@ -83,7 +83,12 @@ final class SystemMediaKeyTap {
             return true
         }
 
-        requestAccessibilityPermissionIfNeeded()
+        // tapCreate raises its own accessibility prompt when untrusted, so bail out
+        // before it: otherwise the user gets two identical dialogs per launch.
+        // HardwareHUDMonitor retries once the permission is granted.
+        guard requestAccessibilityPermissionIfNeeded() else {
+            return false
+        }
 
         guard let systemDefinedEvent else {
             NSLog("Failed to resolve the system-defined CGEvent type.")
@@ -257,20 +262,25 @@ private extension SystemMediaKeyTap {
         AXIsProcessTrusted()
     }
 
-    func requestAccessibilityPermissionIfNeeded() {
-        guard !AXIsProcessTrusted(), !hasRequestedAccessibilityPrompt else {
-            return
+    /// Returns whether the process is trusted, prompting at most once per instance.
+    func requestAccessibilityPermissionIfNeeded() -> Bool {
+        guard !AXIsProcessTrusted() else {
+            return true
+        }
+
+        guard !hasRequestedAccessibilityPrompt else {
+            return false
         }
 
         let promptKey = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String
         let options = [promptKey: true] as CFDictionary
-        _ = AXIsProcessTrustedWithOptions(options)
         hasRequestedAccessibilityPrompt = true
+        return AXIsProcessTrustedWithOptions(options)
     }
 }
 #else
 private extension SystemMediaKeyTap {
     func currentAccessibilityTrustState() -> Bool { true }
-    func requestAccessibilityPermissionIfNeeded() {}
+    func requestAccessibilityPermissionIfNeeded() -> Bool { true }
 }
 #endif
