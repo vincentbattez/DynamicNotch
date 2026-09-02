@@ -1,3 +1,4 @@
+import Combine
 import CoreAudio
 import DynamicNotchContract
 import SwiftUI
@@ -90,9 +91,11 @@ final class FakePowerStateProvider: PowerStateProviding {
 
 final class FakeWifiMonitor: WifiMonitoring {
     var onStatusChange: ((_ wifi: Bool, _ hotspot: Bool, _ vpn: Bool) -> Void)?
+    var onHotspotBatteryChange: ((Int) -> Void)?
     var currentWiFiName: String?
     var currentVPNName: String?
     var currentWiFiSignalLevel: Double = 0.0
+    var currentHotspotBatteryLevel: Int?
     var isInternetAvailable = true
 
     private(set) var startCalls = 0
@@ -200,8 +203,8 @@ final class FakeAudioOutputRoutingService: AudioOutputRouting {
     }
 }
 
-final class FakeFileDownloadMonitor: DownloadMonitoring {
-    var onSnapshotChange: (([DownloadModel]) -> Void)?
+final class FakeFileDownloadMonitor: DownloadMonitoring, @unchecked Sendable {
+    var onSnapshotChange: (@Sendable ([DownloadModel]) -> Void)?
 
     private(set) var startCalls = 0
     private(set) var stopCalls = 0
@@ -407,4 +410,22 @@ func makeNowPlayingSnapshot(
         supportsVolumeControl: supportsVolumeControl,
         refreshedAt: .now
     )
+}
+
+/// Inert Bluetooth service: integration tests run app-hosted, so the real
+/// `BluetoothService.shared` would report this machine's actual headphones and
+/// surface a stray `bluetooth.connected` activity mid-assertion.
+final class FakeBluetoothService: BluetoothServiceProtocol, @unchecked Sendable {
+    @Published var lastConnectedDevice: BluetoothAudioDevice?
+    @Published var connectedDevices: [BluetoothAudioDevice] = []
+
+    var lastConnectedDevicePublisher: AnyPublisher<BluetoothAudioDevice?, Never> {
+        $lastConnectedDevice.eraseToAnyPublisher()
+    }
+
+    var connectedDevicesPublisher: AnyPublisher<[BluetoothAudioDevice], Never> {
+        $connectedDevices.eraseToAnyPublisher()
+    }
+
+    func refreshConnectedDeviceBatteries() {}
 }

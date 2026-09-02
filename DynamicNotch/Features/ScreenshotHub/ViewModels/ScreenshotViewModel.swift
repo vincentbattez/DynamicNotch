@@ -8,6 +8,14 @@ final class ScreenshotViewModel: ObservableObject {
     
     var onScreenshotReady: ((ScreenshotModel) -> Void)?
     var onScreenshotDismissed: (() -> Void)?
+    var onScreenRecordingCaptured: ((URL, NSImage, String) -> Void)? {
+        get { monitorService.onScreenRecordingCaptured }
+        set { monitorService.onScreenRecordingCaptured = newValue }
+    }
+    
+    func scanNow() {
+        monitorService.scanNow()
+    }
     
     private(set) var isDropped = false
     private(set) var isDeleted = false
@@ -77,13 +85,12 @@ final class ScreenshotViewModel: ObservableObject {
         self.activeScreenshot = model
         self.onScreenshotReady?(model)
         
-        ocrService.recognizeText(in: image) { [weak self] extractedText in
-            Task { @MainActor in
-                guard var current = self?.activeScreenshot, current.id == model.id else { return }
-                current.recognizedText = extractedText
-                current.isRecognizing = false
-                self?.activeScreenshot = current
-            }
+        Task { @MainActor [weak self] in
+            let extractedText = await self?.ocrService.recognizeText(in: image) ?? ""
+            guard var current = self?.activeScreenshot, current.id == model.id else { return }
+            current.recognizedText = extractedText
+            current.isRecognizing = false
+            self?.activeScreenshot = current
         }
     }
     

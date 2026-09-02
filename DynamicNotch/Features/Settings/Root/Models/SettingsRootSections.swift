@@ -313,7 +313,7 @@ private enum SettingsSectionCatalog {
                     "Calendar",
                     "Events"
                 ],
-                systemImage: "29.calendar",
+                systemImage: "calendar",
                 imageName: nil,
                 tint: .blue,
                 stroke: true,
@@ -406,7 +406,7 @@ private enum SettingsSectionCatalog {
                 ],
                 systemImage: "camera.viewfinder",
                 imageName: nil,
-                tint: .red,
+                tint: .gray,
                 resetGroup: .screenRecording
             )
 

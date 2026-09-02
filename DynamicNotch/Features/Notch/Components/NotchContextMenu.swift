@@ -2,9 +2,18 @@ import SwiftUI
 
 struct NotchContextMenu: View {
     @ObservedObject var settingsViewModel: SettingsViewModel
+    @ObservedObject private var updater = SparkleUpdater.shared
     
     var body: some View {
         let locale = settingsViewModel.application.appLanguage.locale
+        
+        Button {
+            updater.checkForUpdates()
+        } label: {
+            Image(systemName: "arrow.down.circle")
+            Text(locale.dn("menuBar.checkForUpdates", fallback: "Check for Updates"))
+        }
+        .disabled(!updater.canCheckForUpdates)
         
         Button {
             SettingsWindowController.shared.showWindow()

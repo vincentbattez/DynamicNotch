@@ -39,9 +39,12 @@ final class AppContainer {
     let nowPlayingViewModel: NowPlayingViewModel
     let timerViewModel: TimerViewModel
     let screenRecordingViewModel: ScreenRecordingViewModel
+    let screenRecordingResultViewModel = ScreenRecordingResultViewModel()
     let lockScreenManager: LockScreenManager
     let clockTimerController: any ClockTimerControlling
     let mailManager: MailManager
+    let messagesManager: MessagesManager
+    let externalDrivesMonitor: ExternalDrivesMonitor
 
     lazy var hardwareHUDMonitor: HardwareHUDMonitor = {
         MainActor.assumeIsolated {
@@ -64,28 +67,7 @@ final class AppContainer {
         fileConverterViewModel: fileConverterViewModel
     )
 
-    lazy var notchEventCoordinator = NotchEventCoordinator(
-        notchViewModel: notchViewModel,
-        bluetoothViewModel: bluetoothViewModel,
-        powerService: powerService,
-        wifiViewModel: wifiViewModel,
-        vpnViewModel: vpnViewModel,
-        downloadViewModel: downloadViewModel,
-        airDropViewModel: airDropViewModel,
-        fileTrayViewModel: fileTrayViewModel,
-        fileConverterViewModel: fileConverterViewModel,
-        settingsViewModel: settingsViewModel,
-        nowPlayingViewModel: nowPlayingViewModel,
-        timerViewModel: timerViewModel,
-        screenRecordingViewModel: screenRecordingViewModel,
-        lockScreenManager: lockScreenManager,
-        homePageViewModel: homePageViewModel,
-        localTimerViewModel: localTimerViewModel,
-        notificationCenterViewModel: notificationCenterViewModel,
-        calendarViewModel: calendarViewModel,
-        screenshotViewModel: screenshotViewModel,
-        mailManager: mailManager
-    )
+    lazy var notchEventCoordinator = NotchEventCoordinator(container: self)
 
     /// Carries the timer conflict/replacement policy. Its collaborators are passed as closures
     /// so the routing is testable without the container (Test 3). See `CommandRouter`.
@@ -177,5 +159,7 @@ final class AppContainer {
                 LockScreenSoundPlayer()
         )
         self.mailManager = MailManager()
+        self.messagesManager = MessagesManager()
+        self.externalDrivesMonitor = ExternalDrivesMonitor()
     }
 }

@@ -39,7 +39,7 @@ private extension NotchCustomScaleModifier {
             .simultaneousGesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
-                        guard !notchViewModel.isActivityPresentationHidden || notchViewModel.notchModel.temporaryNotificationContent != nil,
+                        guard (!notchViewModel.isActivityPresentationHidden || notchViewModel.isLocked) || notchViewModel.notchModel.temporaryNotificationContent != nil,
                               !notchViewModel.notchModel.isPresentingExpandedLiveActivity else {
                             resetInteractionState(cancelScaleAnimation: true)
                             return
@@ -75,7 +75,7 @@ private extension NotchCustomScaleModifier {
                         }
                     }
                     .onEnded { value in
-                        guard !notchViewModel.isActivityPresentationHidden || notchViewModel.notchModel.temporaryNotificationContent != nil,
+                        guard (!notchViewModel.isActivityPresentationHidden || notchViewModel.isLocked) || notchViewModel.notchModel.temporaryNotificationContent != nil,
                               !notchViewModel.notchModel.isPresentingExpandedLiveActivity else {
                             resetInteractionState(cancelScaleAnimation: true)
                             didCompleteExpandAction = false
@@ -86,7 +86,8 @@ private extension NotchCustomScaleModifier {
                         isPressValidForTap &&
                         !didCompleteExpandAction
 
-                        resetInteractionState(cancelScaleAnimation: !shouldMaintainHoverScaleAfterRelease)
+                        let shouldCancelScale = !isValidPress && !shouldMaintainHoverScaleAfterRelease
+                        resetInteractionState(cancelScaleAnimation: shouldCancelScale)
 
                         if notchViewModel.shouldExpandActiveContentOnClick && isValidPress {
                             notchViewModel.handleActiveContentTap()
@@ -106,7 +107,7 @@ private extension NotchCustomScaleModifier {
                 }
             }
             .onChange(of: notchViewModel.isActivityPresentationHidden) {
-                if notchViewModel.isActivityPresentationHidden && notchViewModel.notchModel.temporaryNotificationContent == nil {
+                if notchViewModel.isActivityPresentationHidden && !notchViewModel.isLocked && notchViewModel.notchModel.temporaryNotificationContent == nil {
                     resetInteractionState(cancelScaleAnimation: true)
                 }
             }
@@ -132,6 +133,7 @@ private extension NotchCustomScaleModifier {
     private func startPressAnimation() {
         let token = UUID()
         let pressPeakDuration = notchViewModel.notchPressHoldDuration
+        
         pressAnimationToken = token
         notchViewModel.pressScale = 1
 
@@ -144,7 +146,7 @@ private extension NotchCustomScaleModifier {
 
             pressAnimationToken = nil
 
-            withAnimation(.spring(response: 0.30, dampingFraction: 0.5)) {
+            withAnimation(.easeOut(duration: 0.25)) {
                 notchViewModel.pressScale = 1
             }
         }
@@ -153,7 +155,7 @@ private extension NotchCustomScaleModifier {
     private func startHoverAnimation() {
         pressAnimationToken = nil
 
-        withAnimation(.easeOut(duration: min(0.18, notchViewModel.notchHoverExpandDelay))) {
+        withAnimation(.easeOut(duration: min(0.25, notchViewModel.notchHoverExpandDelay))) {
             notchViewModel.pressScale = scaleFactor
         }
     }
@@ -208,7 +210,7 @@ private extension NotchCustomScaleModifier {
                   isHovering,
                   notchViewModel.shouldExpandActiveContentOnHover,
                   !notchViewModel.notchModel.isPresentingExpandedLiveActivity,
-                  (!notchViewModel.isActivityPresentationHidden || notchViewModel.notchModel.temporaryNotificationContent != nil) else {
+                  ((!notchViewModel.isActivityPresentationHidden || notchViewModel.isLocked) || notchViewModel.notchModel.temporaryNotificationContent != nil) else {
                 return
             }
 
@@ -236,7 +238,7 @@ private extension NotchCustomScaleModifier {
         }
 
         guard notchViewModel.shouldExpandActiveContentOnHover,
-              (!notchViewModel.isActivityPresentationHidden || notchViewModel.notchModel.temporaryNotificationContent != nil),
+              ((!notchViewModel.isActivityPresentationHidden || notchViewModel.isLocked) || notchViewModel.notchModel.temporaryNotificationContent != nil),
               !notchViewModel.notchModel.isPresentingExpandedLiveActivity else {
             if !isHovering {
                 resetHoverState()

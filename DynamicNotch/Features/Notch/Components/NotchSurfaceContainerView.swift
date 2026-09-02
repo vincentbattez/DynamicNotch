@@ -82,6 +82,7 @@ struct NotchSurfaceContainerView: View {
                 .resizeAwareBlur(
                     size: notchViewModel.interactiveNotchSize,
                     baseHeight: notchViewModel.notchModel.baseHeight,
+                    isResizeEffectEnabled: content.usesContentResizeEffect,
                     interactiveBlur: notchViewModel.contentResizeBlurRadius,
                     interactiveOpacity: notchViewModel.contentResizeOpacity,
                     swipeProgress: notchViewModel.easedSwipeStretchProgress,
@@ -101,16 +102,19 @@ struct NotchSurfaceContainerView: View {
     @MainActor
     @ViewBuilder
     private func renderedContentView(for content: NotchContentProtocol) -> some View {
-        if notchViewModel.isDisplayingExpandedLiveActivity {
-            content.makeExpandedView()
-        } else {
-            content.makeView()
+        Group {
+            if notchViewModel.isDisplayingExpandedLiveActivity {
+                content.makeExpandedView()
+            } else {
+                content.makeView()
+            }
         }
+        .id(content.id)
     }
     
     private var shouldApplyPressScale: Bool {
         let isExpandedPresentation = notchViewModel.isDisplayingExpandedLiveActivity
-        let isPresentationHidden = (notchViewModel.isActivityPresentationHidden || notchViewModel.isLocked) && notchViewModel.displayedContent == nil
+        let isPresentationHidden = (notchViewModel.isActivityPresentationHidden && !notchViewModel.isLocked) && notchViewModel.displayedContent == nil
         let isScreenshotContent = notchViewModel.displayedContent?.id == NotchContentRegistry.Screenshot.active.id
         return !isExpandedPresentation && !isPresentationHidden && !isScreenshotContent
     }
