@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+#MISE description="Build (CONFIG=Release by default) and install into /Applications, then launch"
+#MISE depends=["check"]
+set -euo pipefail
+cd "$MISE_PROJECT_ROOT"
+
+CONFIG="${CONFIG:-Release}"
+APP="build/Build/Products/$CONFIG/DynamicNotch.app"
+DEST="/Applications/DynamicNotch.app"
+LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
+
+gum style --bold --foreground 212 "📥  Installing DynamicNotch ($CONFIG) into /Applications..."
+
+CONFIG="$CONFIG" mise run build:app
+
+[ -d "$APP" ] || { gum log --level error "Build output not found: $APP"; exit 1; }
+
+killall DynamicNotch 2>/dev/null || true
+
+# A copy, not a symlink: Raycast and Spotlight don't index symlinked bundles.
+# No codesign pass here — see the note in mise-tasks/build/app.
+rm -rf "$DEST"
+ditto "$APP" "$DEST"
+
+# Force LaunchServices to re-index so Raycast/Spotlight pick the new bundle up.
+"$LSREGISTER" -f "$DEST"
+
+open "$DEST"
+
+gum log --level info "Installed $DEST"
